@@ -1,0 +1,3239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#FBF7F9" />
+<title>My PCOS Journey — Wellness &amp; Weight-Loss Tracker</title>
+<style>
+  :root {
+    --plum: #3D2B44;
+    --plum-soft: #6B5873;
+    --plum-faint: #8B7B92;
+    --white: #FFFFFF;
+    --canvas: #FBF7F9;
+    --surface: #FFFFFF;
+    --surface-2: #F8F1F5;
+    --line: rgba(61,43,68,0.08);
+    --line-strong: rgba(61,43,68,0.16);
+
+    --blush: #F6DCE7;
+    --blush-soft: #FBEEF3;
+    --blush-500: #DE8FB4;
+    --blush-600: #C9759F;
+
+    --lavender: #E7E1F7;
+    --lavender-soft: #F4F0FC;
+    --lavender-500: #9A8AD6;
+    --lavender-600: #7F6EC0;
+
+    --sage: #DCEBDA;
+    --sage-soft: #F1F7EF;
+    --sage-500: #7FA876;
+    --sage-600: #648C5C;
+
+    --amber: #C08A4A;
+
+    --r-xs: 10px; --r-sm: 14px; --r-md: 18px; --r-lg: 24px; --r-xl: 30px;
+    --shadow-sm: 0 1px 3px rgba(61,43,68,0.04), 0 6px 20px rgba(61,43,68,0.05);
+    --shadow-md: 0 2px 6px rgba(61,43,68,0.04), 0 14px 34px rgba(61,43,68,0.08);
+    --shadow-lg: 0 18px 50px rgba(61,43,68,0.14);
+    --tap: 46px;
+    --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --nav-h: 72px;
+    --maxw: 1180px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: var(--font);
+    background: var(--canvas);
+    color: var(--plum);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  h1, h2, h3, h4, p { margin: 0; }
+  button { font-family: inherit; font-size: inherit; color: inherit; cursor: pointer; }
+  input, select, textarea { font-family: inherit; font-size: inherit; color: inherit; }
+  a { color: var(--lavender-600); }
+  :focus-visible { outline: 3px solid var(--lavender-500); outline-offset: 2px; border-radius: 8px; }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+  /* Layout */
+  .app { min-height: 100dvh; }
+  .sidebar { display: none; }
+  .main {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: 18px 16px calc(var(--nav-h) + 40px);
+    transition: max-width 0.25s ease;
+  }
+  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+  .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .brand-mark {
+    width: 38px; height: 38px; border-radius: 13px; flex: 0 0 auto;
+    background: linear-gradient(145deg, var(--blush), var(--lavender));
+    display: grid; place-items: center; color: var(--plum);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.7), 0 2px 8px rgba(222,143,180,0.2);
+  }
+  .brand-name { font-size: 15.5px; font-weight: 800; letter-spacing: -0.015em; white-space: nowrap; }
+  .brand-sub { font-size: 11px; color: var(--plum-faint); letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600; }
+  .topbar-right { display: flex; align-items: center; gap: 8px; }
+
+  .view { display: none; animation: fade .28s ease both; }
+  .view.active { display: block; }
+  @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  .grid { display: grid; gap: 14px; }
+  .stack { display: grid; gap: 14px; }
+  .row { display: flex; align-items: center; gap: 10px; }
+  .row.wrap { flex-wrap: wrap; }
+  .spacer { flex: 1; }
+
+  /* Navigation */
+  .tabbar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    border-top: 1px solid var(--line);
+    padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+    display: grid; grid-template-columns: repeat(5, 1fr);
+  }
+  .tab {
+    background: none; border: 0; padding: 7px 2px 5px; border-radius: 14px;
+    display: grid; justify-items: center; gap: 3px; color: var(--plum-faint);
+    font-size: 10.5px; font-weight: 600; letter-spacing: 0.01em; min-height: var(--tap);
+    transition: color .18s ease, background .18s ease;
+    position: relative;
+  }
+  .tab svg { width: 22px; height: 22px; stroke-width: 1.7; transition: transform 0.15s ease; }
+  .tab[aria-current="page"] { color: var(--plum); background: var(--blush-soft); }
+  .tab[aria-current="page"] svg { color: var(--blush-600); transform: translateY(-1px); }
+
+  /* Cards */
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg);
+    padding: 18px; box-shadow: var(--shadow-sm); transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .card.tint-blush { background: linear-gradient(170deg, var(--blush-soft), var(--white) 70%); }
+  .card.tint-sage { background: linear-gradient(170deg, var(--sage-soft), var(--white) 70%); }
+  .card.tint-lav { background: linear-gradient(170deg, var(--lavender-soft), var(--white) 70%); }
+  .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+  .card-title { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; }
+  .card-sub { font-size: 12.5px; color: var(--plum-faint); margin-top: 2px; }
+  .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--plum-faint); }
+
+  .pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700;
+    background: var(--surface-2); color: var(--plum-soft); border: 1px solid var(--line);
+    white-space: nowrap;
+  }
+  .pill.sage { background: var(--sage-soft); color: var(--sage-600); border-color: rgba(127,168,118,0.25); }
+  .pill.blush { background: var(--blush-soft); color: var(--blush-600); border-color: rgba(222,143,180,0.25); }
+  .pill.lav { background: var(--lavender-soft); color: var(--lavender-600); border-color: rgba(154,138,214,0.25); }
+  .pill.plum { background: rgba(61,43,68,0.06); color: var(--plum); }
+  .pill.plain { background: transparent; }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    min-height: var(--tap); padding: 0 18px; border-radius: 999px; border: 1px solid transparent;
+    font-weight: 700; font-size: 14px; letter-spacing: -0.005em;
+    transition: transform .12s ease, box-shadow .18s ease, background .18s ease;
+    text-decoration: none;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn svg { width: 18px; height: 18px; stroke-width: 1.9; }
+  .btn-primary { background: var(--plum); color: #fff; box-shadow: 0 8px 20px rgba(61,43,68,0.2); }
+  .btn-primary:hover { background: #2f2035; }
+  .btn-blush { background: var(--blush-500); color: #47202F; box-shadow: 0 8px 20px rgba(222,143,180,0.28); }
+  .btn-blush:hover { background: #d37fa6; }
+  .btn-sage { background: var(--sage-500); color: #1C3817; box-shadow: 0 8px 20px rgba(127,168,118,0.28); }
+  .btn-sage:hover { background: #719b68; }
+  .btn-lav { background: var(--lavender-soft); color: var(--lavender-600); border-color: rgba(154,138,214,0.3); }
+  .btn-lav:hover { background: var(--lavender); }
+  .btn-soft { background: var(--surface-2); color: var(--plum); border: 1px solid var(--line); }
+  .btn-soft:hover { background: #f0e6ec; }
+  .btn-ghost { background: transparent; color: var(--plum-soft); }
+  .btn-ghost:hover { background: var(--surface-2); color: var(--plum); }
+  .btn-danger { background: #FDE8E8; color: #9B1C1C; }
+  .btn-danger:hover { background: #fbd5d5; }
+  .btn-sm { min-height: 36px; padding: 0 14px; font-size: 13px; }
+  .btn-icon { width: 38px; height: 38px; min-height: 38px; padding: 0; border-radius: 999px; }
+
+  /* Hero & Rings */
+  .hero { display: flex; align-items: center; gap: 20px; }
+  .hero-ring { flex: 0 0 auto; }
+  .hero-copy { flex: 1; min-width: 0; }
+  .rings-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; text-align: center; }
+  .rings-4 .mini { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .rings-4 .mini .ring-wrap { width: 64px; height: 64px; }
+  .rings-4 .mini .ring-lab { font-size: 11.5px; font-weight: 700; color: var(--plum-soft); }
+
+  .ring-wrap { position: relative; display: inline-grid; place-items: center; }
+  .ring-wrap svg { transform: rotate(-90deg); display: block; }
+  .ring-bg { stroke: rgba(61,43,68,0.08); fill: none; }
+  .ring-fg { fill: none; stroke-linecap: round; transition: stroke-dashoffset 0.6s cubic-bezier(0.2, 0.9, 0.3, 1); }
+  .ring-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .ring-val { font-size: 21px; font-weight: 800; letter-spacing: -0.02em; line-height: 1; }
+  .ring-lab { font-size: 10px; font-weight: 700; color: var(--plum-faint); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 3px; }
+
+  .bar { height: 8px; border-radius: 999px; background: rgba(61,43,68,0.08); overflow: hidden; }
+  .bar span { display: block; height: 100%; border-radius: 999px; background: var(--sage-500); transition: width 0.4s ease; }
+  .bar.thin { height: 6px; }
+  .bar.blush span { background: var(--blush-500); }
+  .bar.lav span { background: var(--lavender-500); }
+
+  /* Stats grid */
+  .stats-4 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .stats-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center; }
+  .stat { background: var(--surface-2); border-radius: var(--r-sm); padding: 12px; border: 1px solid var(--line); }
+  .stat-lab { font-size: 11.5px; font-weight: 700; color: var(--plum-faint); display: flex; align-items: center; gap: 5px; }
+  .stat-val { font-size: 19px; font-weight: 800; letter-spacing: -0.02em; margin-top: 3px; }
+  .stat-val small { font-size: 12px; font-weight: 600; color: var(--plum-faint); margin-left: 2px; }
+  .stat-note { font-size: 11px; color: var(--plum-faint); margin-top: 2px; }
+
+  /* Habit checklist item */
+  .habit-item {
+    display: flex; align-items: center; gap: 12px; padding: 11px 12px;
+    border-radius: var(--r-sm); background: var(--surface); border: 1px solid var(--line);
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+  .habit-item.done { background: var(--sage-soft); border-color: rgba(127,168,118,0.22); }
+  .habit-check-btn {
+    width: 28px; height: 28px; border-radius: 8px; border: 2px solid var(--line-strong);
+    background: #fff; display: grid; place-items: center; flex: 0 0 auto;
+    color: transparent; transition: all 0.15s ease; padding: 0; cursor: pointer;
+  }
+  .habit-check-btn.checked {
+    background: var(--sage-500); border-color: var(--sage-500); color: #fff;
+    box-shadow: 0 2px 6px rgba(127,168,118,0.35);
+  }
+  .habit-check-btn svg { width: 16px; height: 16px; stroke-width: 2.5; }
+  .habit-main { flex: 1; min-width: 0; }
+  .habit-title { font-size: 14px; font-weight: 600; }
+  .habit-item.done .habit-title { color: var(--plum); font-weight: 700; }
+  .habit-sub { font-size: 11.5px; color: var(--plum-faint); margin-top: 2px; display: flex; align-items: center; gap: 4px; }
+  .habit-sub.highlight { color: var(--sage-600); font-weight: 600; }
+
+  /* Stepper */
+  .stepper { display: inline-flex; align-items: center; gap: 8px; background: var(--surface-2); padding: 4px 6px; border-radius: 999px; border: 1px solid var(--line); }
+  .stepper button { width: 32px; height: 32px; border-radius: 999px; border: 0; background: #fff; display: grid; place-items: center; box-shadow: 0 1px 3px rgba(61,43,68,0.08); color: var(--plum); }
+  .stepper button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .stepper .v { font-size: 14px; font-weight: 700; padding: 0 6px; min-width: 48px; text-align: center; }
+
+  /* Switch */
+  .switch { position: relative; display: inline-block; width: 44px; height: 26px; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .switch .track { position: absolute; inset: 0; background: rgba(61,43,68,0.14); border-radius: 999px; transition: background 0.2s ease; }
+  .switch .thumb { position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; background: #fff; border-radius: 999px; transition: transform 0.2s ease; box-shadow: 0 1px 4px rgba(61,43,68,0.18); }
+  .switch input:checked + .track { background: var(--sage-500); }
+  .switch input:checked + .track + .thumb, .switch input:checked ~ .thumb { transform: translateX(18px); }
+  .switch-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 8px 0; }
+  .switch-title { font-size: 14px; font-weight: 600; }
+  .switch-desc { font-size: 12px; color: var(--plum-faint); margin-top: 2px; }
+
+  /* Meal Plan styling */
+  .daytabs { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 14px; }
+  .daytab {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sm);
+    padding: 8px 2px; text-align: center; display: grid; justify-items: center; gap: 2px;
+    color: var(--plum-soft); transition: all 0.15s ease;
+  }
+  .daytab.today { border-color: var(--blush-500); }
+  .daytab[aria-selected="true"] { background: var(--plum); color: #fff; border-color: var(--plum); box-shadow: 0 4px 14px rgba(61,43,68,0.18); }
+  .daytab .dn { font-size: 11px; font-weight: 700; text-transform: uppercase; }
+  .daytab .dot { width: 5px; height: 5px; border-radius: 999px; background: var(--sage-500); margin-top: 2px; }
+  .daytab[aria-selected="true"] .dot { background: #fff; }
+
+  .filter-bar { display: inline-flex; background: var(--surface-2); padding: 3px; border-radius: 999px; border: 1px solid var(--line); gap: 2px; }
+  .filter-btn { background: none; border: 0; padding: 5px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; color: var(--plum-soft); transition: all 0.15s ease; }
+  .filter-btn[aria-pressed="true"] { background: #fff; color: var(--plum); font-weight: 700; box-shadow: 0 1px 4px rgba(61,43,68,0.08); }
+
+  .meal {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md);
+    padding: 16px; transition: all 0.18s ease;
+  }
+  .meal.done { background: var(--sage-soft); border-color: rgba(127,168,118,0.25); }
+  .meal-top { display: flex; align-items: flex-start; gap: 14px; }
+  .meal-eaten-btn {
+    display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px;
+    border: 1.5px solid var(--line-strong); background: #fff; font-size: 12px; font-weight: 700;
+    color: var(--plum-soft); cursor: pointer; transition: all 0.15s ease; user-select: none;
+  }
+  .meal-eaten-btn.checked {
+    background: var(--sage-500); border-color: var(--sage-500); color: #1C3817;
+    box-shadow: 0 2px 8px rgba(127,168,118,0.3);
+  }
+  .meal-eaten-btn svg { width: 14px; height: 14px; stroke-width: 2.5; }
+  .meal-name { font-size: 15.5px; font-weight: 700; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .meal.done .meal-name span.txt { text-decoration: line-through; color: var(--plum-soft); }
+  .meal-time { font-size: 11px; font-weight: 700; color: var(--plum-faint); text-transform: uppercase; letter-spacing: 0.04em; }
+  .meal-portion { font-size: 12px; color: var(--plum-soft); font-weight: 600; }
+  .meal-desc { font-size: 13px; color: var(--plum-soft); margin-top: 6px; line-height: 1.45; }
+  .meal-foot { display: flex; align-items: center; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+  .meal-note {
+    flex: 1; min-width: 160px; font-size: 12.5px; padding: 7px 11px; border-radius: var(--r-xs);
+    border: 1px solid var(--line); background: rgba(255,255,255,0.7); color: var(--plum);
+  }
+  .meal-note:focus { background: #fff; border-color: var(--lavender-500); outline: none; }
+
+  /* Walking tracker timer */
+  .timer { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-weight: 800; letter-spacing: -0.02em; }
+  .timer.lg { font-size: 46px; line-height: 1; color: var(--plum); }
+  .timer.md { font-size: 26px; line-height: 1; }
+
+  /* Segmented control */
+  .seg { display: inline-flex; background: var(--surface-2); padding: 3px; border-radius: 999px; border: 1px solid var(--line); }
+  .seg button { background: none; border: 0; padding: 6px 14px; border-radius: 999px; font-size: 12.5px; font-weight: 600; color: var(--plum-soft); }
+  .seg button[aria-pressed="true"] { background: #fff; color: var(--plum); font-weight: 700; box-shadow: 0 1px 4px rgba(61,43,68,0.08); }
+
+  /* 7-day chart */
+  .chart { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; height: 160px; padding: 18px 4px 6px; }
+  .chart .col { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end; gap: 4px; }
+  .chart .track { width: 100%; max-width: 28px; height: 110px; background: rgba(61,43,68,0.06); border-radius: 8px; display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden; position: relative; }
+  .chart .fill-lunch { width: 100%; background: var(--sage-500); border-radius: 0; transition: height 0.4s ease; }
+  .chart .fill-eve { width: 100%; background: var(--lavender-500); border-radius: 8px 8px 0 0; transition: height 0.4s ease; }
+  .chart .col.today .track { box-shadow: 0 0 0 2px var(--blush-600); }
+  .chart .cv { font-size: 10px; font-weight: 700; color: var(--plum-soft); }
+  .chart .cd { font-size: 11px; font-weight: 700; color: var(--plum-faint); }
+
+  /* Habit matrix */
+  .habit-days { display: grid; grid-template-columns: 140px repeat(7, 1fr); gap: 4px; font-size: 11px; font-weight: 700; color: var(--plum-faint); text-align: center; }
+  .habit-grid { display: grid; gap: 6px; }
+  .habit-row { display: grid; grid-template-columns: 140px repeat(7, 1fr); gap: 4px; align-items: center; }
+  .habit-row .hl { font-size: 12.5px; font-weight: 600; color: var(--plum); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .habit-dot { width: 22px; height: 22px; border-radius: 7px; margin: 0 auto; display: grid; place-items: center; }
+  .habit-dot.on { background: var(--sage-soft); color: var(--sage-600); border: 1.5px solid rgba(127,168,118,0.4); }
+  .habit-dot.miss { background: var(--surface-2); border: 1px dashed var(--line-strong); }
+  .habit-dot.future { opacity: 0.25; background: var(--surface-2); }
+  .habit-dot svg { width: 12px; height: 12px; stroke-width: 2.5; }
+
+  /* Achievements */
+  .ach { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .ach:last-child { border-bottom: 0; }
+  .ach-icon { width: 36px; height: 36px; border-radius: 12px; display: grid; place-items: center; background: var(--surface-2); color: var(--plum-soft); flex: 0 0 auto; }
+  .ach.earned .ach-icon { background: var(--sage-soft); color: var(--sage-600); }
+  .ach-title { font-size: 13.5px; font-weight: 700; }
+  .ach-sub { font-size: 11.5px; color: var(--plum-faint); }
+
+  /* Modal Sheet */
+  .modal-backdrop {
+    position: fixed; inset: 0; z-index: 100; background: rgba(30, 16, 36, 0.45);
+    backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+    display: grid; place-items: end center; animation: fadeIn .2s ease;
+  }
+  .sheet {
+    background: #fff; width: 100%; max-width: 520px; border-radius: 26px 26px 0 0;
+    padding: 22px 20px calc(24px + env(safe-area-inset-bottom));
+    box-shadow: var(--shadow-lg); max-height: 90dvh; overflow-y: auto;
+    animation: slideUp .24s cubic-bezier(0.2, 0.9, 0.3, 1);
+  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes slideUp { from { transform: translateY(30px); opacity: 0.5; } to { transform: none; opacity: 1; } }
+  .sheet-handle { width: 40px; height: 4px; border-radius: 999px; background: rgba(61,43,68,0.18); margin: 0 auto 16px; }
+
+  /* Toast */
+  .toast-root {
+    position: fixed; left: 16px; right: 16px; bottom: calc(var(--nav-h) + 16px);
+    z-index: 120; display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none;
+  }
+  .toast {
+    background: var(--plum); color: #fff; padding: 10px 18px; border-radius: 999px;
+    font-size: 13px; font-weight: 600; box-shadow: 0 10px 28px rgba(61,43,68,0.28);
+    pointer-events: auto; animation: toastIn .22s cubic-bezier(0.2, 0.9, 0.3, 1);
+  }
+  @keyframes toastIn { from { transform: translateY(10px) scale(0.96); opacity: 0; } to { transform: none; opacity: 1; } }
+
+  /* Form controls */
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .label { font-size: 12px; font-weight: 700; color: var(--plum-soft); text-transform: uppercase; letter-spacing: 0.04em; }
+  .input {
+    min-height: 44px; padding: 0 14px; border-radius: var(--r-sm); border: 1.5px solid var(--line);
+    background: #fff; color: var(--plum); font-size: 14.5px; transition: border-color .15s ease;
+  }
+  .input:focus { border-color: var(--lavender-500); outline: none; }
+  textarea.input { padding: 10px 14px; min-height: 72px; resize: vertical; }
+
+  /* Quick chips */
+  .chip-group { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 600;
+    background: var(--surface-2); border: 1px solid var(--line); color: var(--plum);
+    cursor: pointer; transition: all 0.15s ease;
+  }
+  .chip:hover { background: var(--blush-soft); border-color: var(--blush-500); }
+  .chip.active { background: var(--plum); color: #fff; border-color: var(--plum); }
+
+  /* Desktop Responsive layout */
+  @media (min-width: 900px) {
+    :root { --nav-h: 0px; }
+    .app { display: grid; grid-template-columns: 260px 1fr; min-height: 100dvh; }
+    .sidebar {
+      display: flex; flex-direction: column; gap: 20px;
+      padding: 28px 20px; background: #fff; border-right: 1px solid var(--line);
+      position: sticky; top: 0; height: 100dvh;
+    }
+    .snav { display: grid; gap: 5px; }
+    .snav button {
+      display: flex; align-items: center; gap: 12px; text-align: left;
+      background: none; border: 0; padding: 12px 14px; border-radius: 14px;
+      font-size: 14px; font-weight: 600; color: var(--plum-soft); min-height: 46px;
+      transition: all 0.15s ease;
+    }
+    .snav button svg { width: 20px; height: 20px; stroke-width: 1.8; }
+    .snav button:hover { background: var(--surface-2); color: var(--plum); }
+    .snav button[aria-current="page"] { background: var(--blush-soft); color: var(--plum); font-weight: 700; }
+    .snav button[aria-current="page"] svg { color: var(--blush-600); }
+    .tabbar { display: none; }
+    .main { padding: 28px 36px 60px; width: 100%; }
+    .topbar .brand { visibility: hidden; }
+    .toast-root { bottom: 24px; }
+    .modal-backdrop { place-items: center; padding: 24px; }
+    .sheet { border-radius: 26px; max-height: 88dvh; }
+    .grid.two { grid-template-columns: 1fr 1fr; }
+    .grid.two-wide { grid-template-columns: 1.25fr 1fr; }
+    .rings-4 { gap: 14px; }
+    .stats-4 { grid-template-columns: repeat(4, 1fr); }
+    .hero { gap: 28px; }
+    .content-wide { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 16px; align-items: start; }
+  }
+
+  /* Device frame preview mode on desktop */
+  body.device-preview { background: #EFE7ED; }
+  body.device-preview .app { display: block; min-height: 100dvh; padding: 24px 0; }
+  body.device-preview .sidebar { display: none !important; }
+  body.device-preview .main {
+    max-width: 414px; margin: 0 auto; background: var(--canvas);
+    border-radius: 44px; box-shadow: 0 24px 60px rgba(61,43,68,0.2), 0 0 0 12px #2A1C30;
+    min-height: 840px; padding: 24px 18px 90px; position: relative; overflow: hidden;
+  }
+  body.device-preview .topbar .brand { visibility: visible; }
+  body.device-preview .tabbar {
+    display: grid !important; position: absolute; max-width: 414px; margin: 0 auto;
+    border-radius: 0 0 44px 44px;
+  }
+  body.device-preview .content-wide { display: grid; grid-template-columns: 1fr; gap: 14px; }
+  body.device-preview .grid.two, body.device-preview .grid.two-wide { grid-template-columns: 1fr; }
+  body.device-preview .stats-4 { grid-template-columns: repeat(2, 1fr); }
+
+  @media (max-width: 380px) {
+    .timer.lg { font-size: 38px; }
+    .rings-4 { gap: 4px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" aria-label="Main navigation">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-9.4A4.1 4.1 0 0 1 12 7a4.1 4.1 0 0 1 7 3.6C19 15.6 12 20 12 20Z"/></svg>
+      </div>
+      <div>
+        <div class="brand-name">My PCOS Journey</div>
+        <div class="brand-sub">Wellness tracker</div>
+      </div>
+    </div>
+    <nav class="snav" id="snav"></nav>
+    <div class="spacer"></div>
+    <div class="card tint-lav" style="padding:14px;box-shadow:none">
+      <div class="eyebrow" style="margin-bottom:4px">Gentle reminder</div>
+      <div class="quote" style="font-size:12.5px;color:var(--plum-soft);line-height:1.5">Consistency over perfection. One nourishing choice at a time. 💗</div>
+    </div>
+  </aside>
+
+  <div>
+    <main class="main" id="main">
+      <div class="topbar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.4-7-9.4A4.1 4.1 0 0 1 12 7a4.1 4.1 0 0 1 7 3.6C19 15.6 12 20 12 20Z"/></svg>
+          </div>
+          <div>
+            <div class="brand-name">My PCOS Journey</div>
+            <div class="brand-sub">Wellness tracker</div>
+          </div>
+        </div>
+        <div class="topbar-right">
+          <button class="btn btn-ghost btn-sm" id="btnDeviceToggle" title="Toggle between responsive desktop view and mobile phone preview frame" style="font-size:12px;padding:0 10px;height:32px">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="3"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+            <span id="deviceToggleLabel">Mobile Frame</span>
+          </button>
+          <span class="pill plain" id="samplePill" title="Demo values are seeded sample data, not real medical measurements">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>
+            Sample data
+          </span>
+          <button class="btn btn-ghost btn-icon btn-sm" data-nav="profile" aria-label="Open profile">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <section class="view" id="view-home" aria-labelledby="homeTitle"></section>
+      <section class="view" id="view-meals" aria-labelledby="mealsTitle"></section>
+      <section class="view" id="view-walk" aria-labelledby="walkTitle"></section>
+      <section class="view" id="view-progress" aria-labelledby="progressTitle"></section>
+      <section class="view" id="view-profile" aria-labelledby="profileTitle"></section>
+    </main>
+  </div>
+
+  <nav class="tabbar" id="tabbar" aria-label="Main navigation"></nav>
+</div>
+
+<div id="modal-root"></div>
+<div class="toast-root" id="toast-root" aria-live="polite" aria-atomic="false"></div>
+
+<script>
+
+(function () {
+  "use strict";
+
+  /* =========================================================
+     Utilities
+     ========================================================= */
+  const $ = (sel, root) => (root || document).querySelector(sel);
+  const $$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
+  const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
+  const pad2 = (n) => String(n).padStart(2, "0");
+
+  const iso = (d) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+  const parseISO = (s) => {
+    const [y, m, d] = s.split("-").map(Number);
+    return new Date(y, m - 1, d);
+  };
+  const addDays = (d, n) => {
+    const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    x.setDate(x.getDate() + n);
+    return x;
+  };
+  const startOfWeek = (d) => {
+    const idx = (d.getDay() + 6) % 7; // Monday = 0
+    return addDays(d, -idx);
+  };
+  const today = () => {
+    const n = new Date();
+    return new Date(n.getFullYear(), n.getMonth(), n.getDate());
+  };
+  const todayKey = () => iso(today());
+  const dayIndex = (d) => (d.getDay() + 6) % 7;
+
+  const fmtDateLong = (d) =>
+    d.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" });
+  const fmtDateShort = (d) =>
+    d.toLocaleDateString(undefined, { day: "numeric", month: "short" });
+  const fmtTime = (ts) =>
+    new Date(ts).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+  const fmtClock = (ms) => {
+    const total = Math.max(0, Math.floor(ms / 1000));
+    const h = Math.floor(total / 3600);
+    const m = Math.floor((total % 3600) / 60);
+    const s = total % 60;
+    return h > 0 ? `${pad2(h)}:${pad2(m)}:${pad2(s)}` : `${pad2(m)}:${pad2(s)}`;
+  };
+  const round1 = (n) => Math.round(n * 10) / 10;
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+  /* =========================================================
+     Storage (localStorage with memory fallback)
+     ========================================================= */
+  const Store = (function () {
+    const KEY = "pcosJourney:v2";
+    let memory = null;
+    let available = false;
+    try {
+      const probe = "__pcos_probe__";
+      window.localStorage.setItem(probe, "1");
+      window.localStorage.removeItem(probe);
+      available = true;
+    } catch (e) {
+      available = false;
+    }
+    return {
+      available,
+      get() {
+        if (!available) return memory;
+        try {
+          const raw = window.localStorage.getItem(KEY);
+          return raw ? JSON.parse(raw) : null;
+        } catch (e) {
+          return memory;
+        }
+      },
+      set(val) {
+        memory = val;
+        if (!available) return;
+        try {
+          window.localStorage.setItem(KEY, JSON.stringify(val));
+        } catch (e) {}
+      },
+      clear() {
+        memory = null;
+        if (!available) return;
+        try {
+          window.localStorage.removeItem(KEY);
+        } catch (e) {}
+      },
+    };
+  })();
+
+  /* =========================================================
+     Static plan data — Vegetarian, PCOS-friendly, Indian
+     ========================================================= */
+  const MEAL_SLOTS = [
+    { key: "breakfast", label: "Breakfast", window: "8:00 – 9:00 am" },
+    { key: "lunch", label: "Lunch", window: "1:00 – 2:00 pm" },
+    { key: "snack", label: "Evening snack", window: "5:00 – 6:00 pm" },
+    { key: "dinner", label: "Dinner", window: "8:00 – 8:45 pm" },
+    { key: "extra", label: "Extra snack / fruit", window: "Optional" },
+  ];
+
+  const DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+  const DAY_SHORT = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+  const PLAN = [
+    {
+      breakfast: { name: "Moong dal chillas", portion: "2 chillas + 1 tbsp mint chutney", desc: "Yellow moong dal batter with grated carrot, spinach and cumin, cooked on a lightly greased tawa. High protein, gentle on digestion." },
+      lunch: { name: "Phulka, bhindi & dal tadka", portion: "2 phulkas + 1 katori bhindi + 1 katori dal + kachumber", desc: "Seasonal okra (bhindi) sautéed with cumin & ajwain, yellow toor dal with a tsp of ghee, and crunchy cucumber-tomato salad." },
+      snack: { name: "Roasted chana & green tea", portion: "1 small fistful chana + 1 cup lemon green tea", desc: "Dry-roasted whole Bengal gram with peel. Packed with complex carbs, resistant starch and iron to steady evening energy." },
+      dinner: { name: "Vegetable khichdi with fresh curd", portion: "1 bowl dal-khichdi + 1 katori curd", desc: "Warm comfort bowl of rice, yellow moong dal, carrots and beans tempered with hing and cumin, paired with probiotic curd." },
+      extra: { name: "Seasonal papaya or berries", portion: "1 small bowl (100 g)", desc: "Fresh fruit rich in enzymes, vitamin C and dietary fibre." },
+    },
+    {
+      breakfast: { name: "Vegetable rolled oats with milk", portion: "1 bowl savory oats + 1 cup warm toned milk", desc: "Rolled oats simmered with diced peas, carrots, turmeric and mustard seeds. Beta-glucan fibre supports insulin sensitivity." },
+      lunch: { name: "Rajma, steamed rice & curd", portion: "1 katori rajma + 1 katori rice + cucumber slices", desc: "Slow-cooked kidney beans with cumin and ginger, steamed rice with a tsp of ghee, and cooling curd. High in plant protein and iron." },
+      snack: { name: "Homemade atta-sesame laddu", portion: "1 small laddu + warm water", desc: "Whole-wheat flour roasted in ghee with white sesame seeds (til), gond, and crushed almonds. Rich in zinc, calcium and healthy fats." },
+      dinner: { name: "Bajra roti with lauki & paneer", portion: "1 bajra roti + 1 katori lauki + 50g sautéed paneer", desc: "Millet roti paired with bottle-gourd sabzi and lightly seared paneer cubes. Low glycemic index and calming for evening rest." },
+      extra: { name: "Fresh sweet orange / citrus", portion: "1 whole fruit", desc: "Citrus bioflavonoids and vitamin C enhance non-heme iron absorption." },
+    },
+    {
+      breakfast: { name: "Vegetable poha with peanuts", portion: "1 bowl poha + 1 tbsp roasted peanuts", desc: "Thick beaten rice with curry leaves, onions, green peas and lemon juice. Topped with crunchy peanuts for healthy satiety." },
+      lunch: { name: "Roti, chana masala & stir-fried palak", portion: "2 phulkas + 1 katori chana + 1 katori spinach", desc: "White chickpeas slow-simmered with garlic, tomatoes and garam masala, alongside iron-rich garlic spinach sabzi." },
+      snack: { name: "Roasted makhana & chaas", portion: "1 bowl foxnuts + 1 glass spiced buttermilk", desc: "Crunchy makhana roasted in 1/2 tsp ghee with rock salt, paired with chilled buttermilk infused with roasted jeera." },
+      dinner: { name: "Moong dal khichdi & crispy bhindi", portion: "1 bowl khichdi + 1 katori okra + fresh curd", desc: "Light, soothing dinner plate. Soluble fibre from bhindi slows glucose absorption." },
+      extra: { name: "Sliced apple with a pinch of cinnamon", portion: "1 medium apple", desc: "Cinnamon offers natural support for steady fasting glucose." },
+    },
+    {
+      breakfast: { name: "Vegetable daliya with crushed almonds", portion: "1 bowl broken-wheat porridge + 6 almonds", desc: "Slow-cooked broken wheat with finely chopped beans, carrots and mild spices. Topped with soaked almonds." },
+      lunch: { name: "Rajma, phulka & kachumber salad", portion: "1 katori slow-cooked rajma + 2 rotis + crunchy salad", desc: "Wholesome legume protein combined with whole wheat and raw salad dressed with lemon and pink salt." },
+      snack: { name: "Roasted chana & homemade laddu", portion: "1 laddu + small handful chana", desc: "Sustained afternoon fuel from complex pulses and nourishing seeds." },
+      dinner: { name: "Paneer bhurji with roti & dal", portion: "100g paneer bhurji + 1 phulka + 1/2 katori moong dal", desc: "Crumbled fresh paneer sautéed with bell peppers, tomatoes and coriander. Satiating protein for peaceful overnight repair." },
+      extra: { name: "Tender coconut water or buttermilk", portion: "1 glass", desc: "Natural electrolytes and minerals without refined sugars." },
+    },
+    {
+      breakfast: { name: "Steamed idlis with vegetable sambar", portion: "2 idlis + 1 bowl dal-rich sambar + 1 tbsp chutney", desc: "Fermented rice-and-urad dal cakes with a vegetable-packed lentil stew. Gentle on gut flora." },
+      lunch: { name: "Phulka, mixed seasonal veg & moong dal", portion: "2 rotis + 1 katori cauliflower-peas + 1 katori thick dal", desc: "Traditional home-style lunch providing dietary variety, potassium, and steady fuel." },
+      snack: { name: "Sprouted moong chaat with lemon", portion: "1 bowl steamed sprouts with diced tomato & onion", desc: "Sprouted green gram tossed with lemon juice, chaat masala and fresh mint. Enzymatically rich and high in active fibre." },
+      dinner: { name: "Vegetable pulao with cucumber raita", portion: "1 bowl veggie pulao + 1 bowl fresh curd raita", desc: "Basmati rice cooked with French beans, carrots and whole spices, paired with a generous bowl of cucumber raita." },
+      extra: { name: "Handful of walnuts & pumpkin seeds", portion: "1 tbsp mixed nuts & seeds", desc: "Plant omega-3 fatty acids and zinc supporting endocrine health." },
+    },
+    {
+      breakfast: { name: "Ragi dosa with tomato chutney", portion: "2 crisp finger-millet dosas + tomato-garlic chutney", desc: "Calcium-rich ragi flour dosa with savory tomato chutney. Rich in essential minerals." },
+      lunch: { name: "Chole, steamed jeera rice & green salad", portion: "1 katori chole + 1 katori rice + cucumber & beetroot", desc: "Spiced chickpeas with cumin rice and a raw vegetable plate. Wholesome weekend comfort with zero guilt." },
+      snack: { name: "Homemade atta-sesame-gond laddu", portion: "1 laddu + warm herbal tea", desc: "Nourishing postpartum and PCOS traditional recipe: gond (edible gum), til and nuts." },
+      dinner: { name: "Tofu & vegetable curry with roti", portion: "1 katori tofu in tomato gravy + 2 soft phulkas", desc: "High-protein soy cubes simmered in onion-tomato masala with bell peppers. Clean, light finish." },
+      extra: { name: "Fresh sweet lime (mosambi) or pear", portion: "1 whole fruit", desc: "Juicy hydration with natural vitamin C and potassium." },
+    },
+    {
+      breakfast: { name: "Paneer paratha with fresh curd", portion: "1 whole-wheat stuffed paratha + 1 katori curd", desc: "Grated paneer, green chillies and fresh coriander stuffed in wheat dough, cooked with minimal ghee. Sunday warmth." },
+      lunch: { name: "Dal makhani (light) / Rajma, phulka & salad", portion: "1 katori slow-cooked dal + 2 rotis + salad + 1 tsp ghee", desc: "Slow-simmered whole black lentils or kidney beans with aromatics. Satiating and mineral-rich." },
+      snack: { name: "Mixed fruit bowl with chia & sunflower seeds", portion: "1 bowl papaya, apple & pomegranate + 1 tsp seeds", desc: "Relaxed weekend antioxidant bowl enjoyed mindfully." },
+      dinner: { name: "Comforting moong khichdi with bhindi", portion: "1 bowl khichdi + 1 katori sauteed bhindi + curd", desc: "Cook once, eat calm. Restorative meal to prepare your body for a sound night of sleep." },
+      extra: { name: "Spiced golden milk (Haldi doodh)", portion: "1 cup warm milk with turmeric & pinch of pepper", desc: "Traditional anti-inflammatory bedtime sip with curcumin." },
+    },
+  ];
+
+  /* Ingredients for Laddu Batch Calculator */
+  const INGREDIENTS = [
+    { name: "Whole-wheat atta", kcal: 341, protein: 12, carbs: 71, fat: 2.5, fibre: 11, iron: 3.6 },
+    { name: "Desi ghee", kcal: 900, protein: 0, carbs: 0, fat: 100, fibre: 0, iron: 0 },
+    { name: "Sesame seeds (til)", kcal: 573, protein: 17, carbs: 23, fat: 50, fibre: 12, iron: 14.6 },
+    { name: "Gond (edible gum)", kcal: 350, protein: 2, carbs: 80, fat: 1, fibre: 2, iron: 0.5 },
+    { name: "Jaggery (gud)", kcal: 383, protein: 0.4, carbs: 98, fat: 0.1, fibre: 0, iron: 3.0 },
+    { name: "Dates (khajoor)", kcal: 282, protein: 2.5, carbs: 75, fat: 0.4, fibre: 8, iron: 1.0 },
+    { name: "Almonds", kcal: 579, protein: 21, carbs: 22, fat: 50, fibre: 12.5, iron: 3.7 },
+    { name: "Walnuts", kcal: 654, protein: 15, carbs: 14, fat: 65, fibre: 7, iron: 2.9 },
+    { name: "Cashews", kcal: 553, protein: 18, carbs: 30, fat: 44, fibre: 3, iron: 6.7 },
+    { name: "Raisins (kishmish)", kcal: 299, protein: 3, carbs: 79, fat: 0.5, fibre: 4, iron: 1.9 },
+    { name: "Poppy seeds (khus khus)", kcal: 525, protein: 18, carbs: 28, fat: 42, fibre: 20, iron: 9.8 },
+    { name: "Dry fruit mix", kcal: 560, protein: 18, carbs: 26, fat: 48, fibre: 8, iron: 4.0 },
+  ];
+
+  /* Snacks suggestions for Quick Log */
+  const SNACK_SUGGESTIONS = [
+    { name: "Roasted Makhana (Foxnuts)", portion: "1 bowl (30g) in 1/2 tsp ghee" },
+    { name: "Masala Chaas / Spiced Buttermilk", portion: "1 glass (250 ml) with jeera" },
+    { name: "Sprouted Moong Chaat with Lemon", portion: "1 small bowl (100g)" },
+    { name: "Cucumber & Tomato Salad", portion: "1 bowl with lemon & pink salt" },
+    { name: "Paneer Cubes with Chaat Masala", portion: "50g pan-seared paneer" },
+    { name: "Handful of Walnuts & Almonds", portion: "4-5 almonds + 2 walnuts" },
+    { name: "Vegetable Besan Cheela", portion: "1 medium cheela with mint chutney" },
+    { name: "Apple Slices with Cinnamon", portion: "1 small apple" },
+    { name: "Roasted Chana & Green Tea", portion: "1 fistful roasted chana" },
+  ];
+
+  /* 8 Daily Habits */
+  const HABITS = [
+    { key: "breakfast", label: "Breakfast eaten", icon: "meal" },
+    { key: "lunch", label: "Lunch eaten", icon: "meal" },
+    { key: "snack", label: "Evening snack logged", icon: "meal" },
+    { key: "dinner", label: "Dinner eaten", icon: "meal" },
+    { key: "walkLunch", label: "Lunch walk completed", icon: "walk" },
+    { key: "walkEvening", label: "Evening walk completed", icon: "walk" },
+    { key: "water", label: "Water goal reached", icon: "water" },
+    { key: "sleep", label: "Sleep routine followed", icon: "sleep" },
+  ];
+
+  const WALK_TYPES = {
+    lunch: { label: "Lunch walk", when: "After lunch", start: "Start Lunch Walk" },
+    evening: { label: "Evening walk", when: "After dinner", start: "Start Evening Walk" },
+  };
+
+  /* =========================================================
+     State & Persistence
+     ========================================================= */
+  function blankMeal() {
+    return { eaten: false, at: null, note: "" };
+  }
+  function blankDay() {
+    return {
+      meals: {
+        breakfast: blankMeal(),
+        lunch: blankMeal(),
+        snack: blankMeal(),
+        dinner: blankMeal(),
+        extra: blankMeal(),
+      },
+      walks: {
+        lunch: { minutes: 0, sessions: [] },
+        evening: { minutes: 0, sessions: [] },
+      },
+      water: 0,
+      sleep: { bed: "23:00", wake: "07:00", routine: false, at: null },
+      steps: null,
+      stepsSource: null, // "manual" | "device" | "pedometer" | "sample" | null
+      foods: [],
+      active: null,
+    };
+  }
+
+  function seededRand(seedStr) {
+    let h = 1779033703 ^ seedStr.length;
+    for (let i = 0; i < seedStr.length; i++) {
+      h = Math.imul(h ^ seedStr.charCodeAt(i), 3432918353);
+      h = (h << 13) | (h >>> 19);
+    }
+    return function () {
+      h = Math.imul(h ^ (h >>> 16), 2246822507);
+      h = Math.imul(h ^ (h >>> 13), 3266489909);
+      return ((h ^= h >>> 16) >>> 0) / 4294967296;
+    };
+  }
+
+  let state = {
+    profile: {
+      name: "Aarohi",
+      weightKg: 73.5,
+      heightCm: 162,
+      goalWeightKg: null,
+      diet: "vegetarian",
+      walkDailyGoal: 60,
+      walkSessionGoal: 30,
+      waterGlasses: 8,
+      waterGlassMl: 250,
+      sleepGoal: 8,
+      stepsGoal: 8000,
+      units: "metric",
+      notifications: { meals: true, water: true, walks: true, sleep: true, weekly: true },
+      privacy: { share: false, hideWeight: false },
+    },
+    days: {},
+    weights: [],
+    ladduBatches: [],
+    seededThrough: null,
+    ui: {
+      view: "home",
+      mealsDay: todayKey(),
+      mealsFilter: "all", // "all" | "completed" | "remaining"
+      progressRange: "week",
+      deviceFrame: false,
+    },
+  };
+
+  function seedSampleData() {
+    const now = today();
+    const wkStart = startOfWeek(now);
+    const dayOffset = (now - wkStart) / 86400000;
+
+    state.weights = [
+      { date: iso(addDays(now, -21)), kg: 74.6 },
+      { date: iso(addDays(now, -14)), kg: 74.1 },
+      { date: iso(addDays(now, -7)), kg: 73.7 },
+      { date: iso(now), kg: 73.5 },
+    ];
+
+    state.ladduBatches = [
+      {
+        id: "batch-demo",
+        name: "Atta-Til-Gond Laddus",
+        sample: true,
+        ingredients: [
+          { name: "Whole-wheat atta", grams: 250 },
+          { name: "Desi ghee", grams: 100 },
+          { name: "Sesame seeds (til)", grams: 80 },
+          { name: "Gond (edible gum)", grams: 50 },
+          { name: "Jaggery (gud)", grams: 120 },
+          { name: "Almonds", grams: 60 },
+        ],
+        count: 14,
+        created: Date.now() - 3 * 86400000,
+      },
+    ];
+
+    // Seed the 7 days of the active week (Monday to Sunday)
+    for (let i = 0; i < 7; i++) {
+      const d = addDays(wkStart, i);
+      const key = iso(d);
+      if (!state.days[key]) state.days[key] = blankDay();
+      const rec = state.days[key];
+      const rand = seededRand(key);
+      const isPast = d < now;
+      const isToday = d.getTime() === now.getTime();
+
+      if (isPast) {
+        // Complete past days with high consistency
+        MEAL_SLOTS.forEach((slot, si) => {
+          rec.meals[slot.key].eaten = true;
+          const h = [8, 13, 17, 20, 11][si];
+          rec.meals[slot.key].at = new Date(d.getFullYear(), d.getMonth(), d.getDate(), h, 15 + Math.floor(rand() * 30)).getTime();
+        });
+        rec.water = state.profile.waterGlasses;
+        rec.sleep.bed = "22:45";
+        rec.sleep.wake = "06:45";
+        rec.sleep.routine = true;
+        rec.sleep.at = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 0).getTime();
+
+        const lMins = 30 + Math.floor(rand() * 5);
+        const eMins = 30 + Math.floor(rand() * 5);
+        rec.walks.lunch.minutes = lMins;
+        rec.walks.lunch.sessions = [{
+          id: uid(), date: key,
+          start: new Date(d.getFullYear(), d.getMonth(), d.getDate(), 13, 45).getTime(),
+          end: new Date(d.getFullYear(), d.getMonth(), d.getDate(), 13, 45 + lMins).getTime(),
+          minutes: lMins, complete: true, sample: true,
+        }];
+        rec.walks.evening.minutes = eMins;
+        rec.walks.evening.sessions = [{
+          id: uid(), date: key,
+          start: new Date(d.getFullYear(), d.getMonth(), d.getDate(), 20, 30).getTime(),
+          end: new Date(d.getFullYear(), d.getMonth(), d.getDate(), 20, 30 + eMins).getTime(),
+          minutes: eMins, complete: true, sample: true,
+        }];
+        rec.steps = 7400 + Math.floor(rand() * 1400);
+        rec.stepsSource = "sample";
+      } else if (isToday) {
+        // Today has realistic progress: Breakfast & Lunch eaten, Lunch walk done, Afternoon hydration
+        rec.meals.breakfast.eaten = true;
+        rec.meals.breakfast.at = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 8, 30).getTime();
+        rec.meals.lunch.eaten = true;
+        rec.meals.lunch.at = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 13, 15).getTime();
+        rec.meals.snack.eaten = false;
+        rec.meals.dinner.eaten = false;
+        rec.meals.extra.eaten = false;
+
+        rec.walks.lunch.minutes = 30;
+        rec.walks.lunch.sessions = [{
+          id: uid(), date: key,
+          start: new Date(d.getFullYear(), d.getMonth(), d.getDate(), 13, 40).getTime(),
+          end: new Date(d.getFullYear(), d.getMonth(), d.getDate(), 14, 10).getTime(),
+          minutes: 30, complete: true, sample: true,
+        }];
+        rec.walks.evening.minutes = 0;
+        rec.walks.evening.sessions = [];
+
+        rec.water = 5; // 5 of 8 glasses
+        rec.sleep.bed = "23:00";
+        rec.sleep.wake = "07:00";
+        rec.sleep.routine = false;
+        rec.steps = 5120;
+        rec.stepsSource = "sample";
+      }
+    }
+    state.seededThrough = todayKey();
+  }
+
+  function loadState() {
+    const saved = Store.get();
+    if (saved && saved.profile && saved.days) {
+      state = saved;
+      if (!state.ui) state.ui = { view: "home", mealsDay: todayKey(), mealsFilter: "all", progressRange: "week", deviceFrame: false };
+      if (!state.ladduBatches) state.ladduBatches = [];
+      if (!state.weights) state.weights = [];
+    } else {
+      seedSampleData();
+      saveNow();
+    }
+  }
+
+  let saveTimer = null;
+  function save() {
+    if (saveTimer) return;
+    saveTimer = setTimeout(() => { saveTimer = null; saveNow(); }, 250);
+  }
+  function saveNow() {
+    if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
+    Store.set(state);
+  }
+
+  function getDay(key) {
+    if (!state.days[key]) state.days[key] = blankDay();
+    return state.days[key];
+  }
+
+  /* =========================================================
+     Calculations & Metrics
+     ========================================================= */
+  function mealsPlannedFor(key) {
+    const d = parseISO(key);
+    const plan = PLAN[dayIndex(d)];
+    return MEAL_SLOTS.filter((s) => !!plan[s.key]).length;
+  }
+  function mealsEaten(key) {
+    const d = getDay(key);
+    return MEAL_SLOTS.filter((s) => d.meals[s.key] && d.meals[s.key].eaten).length;
+  }
+  function mealPct(key) {
+    const planned = mealsPlannedFor(key);
+    return planned > 0 ? clamp(mealsEaten(key) / planned, 0, 1) : 0;
+  }
+
+  function walkMinutes(key) {
+    const d = getDay(key);
+    return (d.walks.lunch.minutes || 0) + (d.walks.evening.minutes || 0);
+  }
+  function walkPct(key) {
+    return clamp(walkMinutes(key) / state.profile.walkDailyGoal, 0, 1);
+  }
+  function waterPct(key) {
+    return clamp(getDay(key).water / state.profile.waterGlasses, 0, 1);
+  }
+  function sleepHoursFor(key) {
+    const s = getDay(key).sleep;
+    if (!s || !s.bed || !s.wake) return null;
+    const [bh, bm] = s.bed.split(":").map(Number);
+    const [wh, wm] = s.wake.split(":").map(Number);
+    let min = (wh * 60 + wm) - (bh * 60 + bm);
+    if (min < 0) min += 1440;
+    return round1(min / 60);
+  }
+
+  function lastWalkEnd(walkObj) {
+    if (!walkObj || !walkObj.sessions || !walkObj.sessions.length) return null;
+    return walkObj.sessions[walkObj.sessions.length - 1].end;
+  }
+
+  function habitsFor(key) {
+    const d = getDay(key);
+    const goal = state.profile.walkSessionGoal;
+    return {
+      breakfast: { done: !!d.meals.breakfast.eaten, at: d.meals.breakfast.at },
+      lunch: { done: !!d.meals.lunch.eaten, at: d.meals.lunch.at },
+      snack: { done: !!d.meals.snack.eaten, at: d.meals.snack.at },
+      dinner: { done: !!d.meals.dinner.eaten, at: d.meals.dinner.at },
+      walkLunch: { done: (d.walks.lunch.minutes || 0) >= goal, at: lastWalkEnd(d.walks.lunch) },
+      walkEvening: { done: (d.walks.evening.minutes || 0) >= goal, at: lastWalkEnd(d.walks.evening) },
+      water: { done: d.water >= state.profile.waterGlasses && d.water > 0, at: null },
+      sleep: { done: !!d.sleep.routine, at: d.sleep.at },
+    };
+  }
+  function completedHabits(key) {
+    const h = habitsFor(key);
+    return HABITS.filter((item) => h[item.key].done).length;
+  }
+  function habitPct(key) {
+    return clamp(completedHabits(key) / HABITS.length, 0, 1);
+  }
+
+  function overallPct(key) {
+    // Balanced 4-pillar average: meals, walking, water, habits
+    const m = mealPct(key);
+    const w = walkPct(key);
+    const h = waterPct(key);
+    const b = habitPct(key);
+    return (m + w + h + b) / 4;
+  }
+
+  function strideMeters() {
+    if (state.profile.heightCm) return (state.profile.heightCm * 0.415) / 100;
+    return 0.72;
+  }
+  function distanceKm(key) {
+    const d = getDay(key);
+    if (d.steps != null && d.steps > 0) {
+      return (d.steps * strideMeters()) / 1000;
+    }
+    const mins = walkMinutes(key);
+    if (mins > 0) return mins * 0.08; // ~80m per min moderate walking
+    return 0;
+  }
+  function distanceIsMeasured(key) {
+    const d = getDay(key);
+    return d.steps != null && d.steps > 0;
+  }
+  function weightForCalc() {
+    return state.profile.weightKg || 68;
+  }
+  function kcalBurned(key) {
+    const mins = walkMinutes(key);
+    if (mins <= 0) return 0;
+    // 3.3 METs for moderate walking: kcal = 3.3 * weightKg * (minutes / 60)
+    return 3.3 * weightForCalc() * (mins / 60);
+  }
+  function kcalIsEstimated() {
+    return true;
+  }
+
+  function motivationalMessage(key) {
+    const p = overallPct(key);
+    const w = walkMinutes(key);
+    const d = getDay(key);
+    if (p >= 0.95) return "A complete, beautifully balanced day. You honored your body with gentle consistency! 💗";
+    if (p >= 0.75) return "You're doing wonderfully. A short evening walk or quiet tea will round out a lovely day.";
+    if (p >= 0.5) return "Halfway is a powerful place to be. Every steady, calm choice is moving you forward.";
+    if (w >= 30) return "You've already walked 30 minutes today! Your post-meal walk does wonders for glucose calm.";
+    if (d.meals.breakfast.eaten && d.meals.lunch.eaten) return "Two steady, nourishing meals logged today. Keep this relaxed momentum.";
+    if (p >= 0.25) return "A gentle start. Choose one kind thing for yourself next — no rush, just one.";
+    return "Every wellness journey begins with one small step. Take a deep breath and start gently. 💗";
+  }
+
+  /* =========================================================
+     Icons
+     ========================================================= */
+  const ICONS = {
+    home: '<path d="M4 10.5 12 4l8 6.5"/><path d="M6 9.8V19a1 1 0 0 0 1 1h3.2v-4.3a1.8 1.8 0 0 1 3.6 0V20H17a1 1 0 0 0 1-1V9.8"/>',
+    meal: '<path d="M4 4v6a2.5 2.5 0 0 0 5 0V4"/><path d="M6.5 10v10"/><path d="M15 4c-1.6 0-2.6 2-2.6 5s1 4 2.6 4 2.6-1 2.6-4-1-5-2.6-5Z"/><path d="M15 13v7"/>',
+    walk: '<circle cx="13" cy="4.6" r="1.8"/><path d="M11.5 9.5 9 12.2l1.6 3.2L9 20"/><path d="m11.5 9.5 3.1 1.4 1.9 2.6"/><path d="m14.6 10.9-1.2 4.6 2.6 4.5"/>',
+    chart: '<path d="M4 20h16"/><path d="M7 20v-6"/><path d="M12 20V7"/><path d="M17 20v-9"/>',
+    user: '<circle cx="12" cy="8" r="3.4"/><path d="M5 20a7 7 0 0 1 14 0"/>',
+    check: '<path d="m5 12.5 4.2 4.2L19 7"/>',
+    plus: '<path d="M12 5v14M5 12h14"/>',
+    minus: '<path d="M5 12h14"/>',
+    water: '<path d="M12 3.5c3.2 4 5.5 6.6 5.5 9.6a5.5 5.5 0 0 1-11 0c0-3 2.3-5.6 5.5-9.6Z"/>',
+    sleep: '<path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"/>',
+    steps: '<path d="M8.5 4.5c1.2 0 2 .9 2 2.2 0 1.7-.5 3-.5 4.3 0 1 .4 1.7.4 2.6 0 1-.7 1.6-1.8 1.6s-1.9-.7-1.9-1.9c0-1.6.9-2.6.9-4.2 0-1 .3-1.7.3-2.4 0-1.3.2-2.2.6-2.2Z"/><path d="M16.2 12.2c1.1 0 1.9.8 1.9 2 0 1.6-.6 2.6-.6 3.7 0 .9.3 1.4.3 2.1 0 .9-.6 1.4-1.6 1.4s-1.7-.6-1.7-1.6c0-1.4.8-2.2.8-3.6 0-.9.2-1.5.2-2.1 0-1.1.2-1.9.7-1.9Z"/>',
+    flame: '<path d="M12 3c.5 3.2-2.5 4.3-2.5 7A2.5 2.5 0 0 0 12 12.5 2.5 2.5 0 0 0 14.5 10c0-.8-.3-1.4-.5-2 2.3 1.5 4 3.5 4 6a6 6 0 0 1-12 0c0-4.5 4.5-6.2 6-11Z"/>',
+    clock: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 1.8"/>',
+    play: '<path d="M8 5.5v13l11-6.5-11-6.5Z"/>',
+    pause: '<path d="M9 5v14M15 5v14"/>',
+    stop: '<rect x="6" y="6" width="12" height="12" rx="2.5"/>',
+    edit: '<path d="M4 20h4l10-10a2.8 2.8 0 0 0-4-4L4 16v4Z"/><path d="m14.5 6.5 3 3"/>',
+    note: '<path d="M5 4.5h9l5 5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5.5a1 1 0 0 1 1-1Z"/><path d="M14 4.5V10h5"/>',
+    sparkle: '<path d="M12 3.5 13.7 9l5.5 1.7-5.5 1.7L12 18l-1.7-5.6L4.8 10.7 10.3 9 12 3.5Z"/>',
+    chevron: '<path d="m9 6 6 6-6 6"/>',
+    x: '<path d="M6 6l12 12M18 6 6 18"/>',
+    trash: '<path d="M4.5 7h15"/><path d="M9 7V5.2A1.2 1.2 0 0 1 10.2 4h3.6A1.2 1.2 0 0 1 15 5.2V7"/><path d="M6.5 7l.8 12.1a1.4 1.4 0 0 0 1.4 1.3h6.6a1.4 1.4 0 0 0 1.4-1.3L17.5 7"/>',
+    food: '<path d="M4 20V9a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v11"/><path d="M4 14h13"/><path d="M17 20V11"/><path d="M20 7v4"/>',
+    phone: '<rect x="5" y="2" width="14" height="20" rx="3"/><line x1="12" y1="18" x2="12.01" y2="18"/>',
+  };
+
+  function icon(name, size) {
+    const s = size || 18;
+    const body = ICONS[name] || ICONS.sparkle;
+    return `<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
+  }
+
+  function ringSvg(pct, opts) {
+    const p = clamp(pct, 0, 1);
+    const size = opts.size || 64;
+    const stroke = opts.stroke || 7;
+    const r = (size - stroke) / 2;
+    const c = 2 * Math.PI * r;
+    const offset = c * (1 - p);
+    const color = opts.color || "var(--blush-500)";
+    const label = opts.label || "Progress ring";
+    return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" role="img" aria-label="${label}">
+      <circle class="ring-bg" cx="${size/2}" cy="${size/2}" r="${r}" stroke-width="${stroke}" />
+      <circle class="ring-fg" cx="${size/2}" cy="${size/2}" r="${r}" stroke-width="${stroke}" stroke="${color}"
+        stroke-dasharray="${c}" stroke-dashoffset="${offset}" />
+    </svg>`;
+  }
+
+  function ringBlock(pct, opts) {
+    const p = clamp(pct, 0, 1);
+    const big = opts.big || `${Math.round(p * 100)}%`;
+    const sub = opts.sub || "";
+    return `<div class="ring-wrap" style="width:${opts.size}px;height:${opts.size}px">
+      ${ringSvg(p, opts)}
+      <div class="ring-center">
+        <div class="ring-val">${big}</div>
+        ${sub ? `<div class="ring-lab">${sub}</div>` : ""}
+      </div>
+    </div>`;
+  }
+
+  function dayLabel(key) {
+    const d = parseISO(key);
+    return `${DAY_NAMES[dayIndex(d)]}, ${fmtDateShort(d)}`;
+  }
+
+  function sourceBadge(text, kind) {
+    return `<span class="pill ${kind || "plain"}" style="font-size:10px;padding:2px 7px">${text}</span>`;
+  }
+
+  /* =========================================================
+     Navigation
+     ========================================================= */
+  const NAV_ITEMS = [
+    { id: "home", label: "Home", icon: "home" },
+    { id: "meals", label: "Meal Plan", icon: "meal" },
+    { id: "walk", label: "Walk", icon: "walk" },
+    { id: "progress", label: "Progress", icon: "chart" },
+    { id: "profile", label: "Profile", icon: "user" },
+  ];
+
+  function renderNav() {
+    const cur = state.ui.view;
+    const key = todayKey();
+    const incompleteHabits = HABITS.length - completedHabits(key);
+    const aw = getActive();
+
+    const tabsHtml = NAV_ITEMS.map((item) => {
+      const active = item.id === cur;
+      let badge = "";
+      if (item.id === "walk" && aw && aw.running) badge = '<span class="tab-badge" style="background:var(--sage-500)"></span>';
+      else if (item.id === "home" && incompleteHabits > 0 && incompleteHabits < HABITS.length) badge = '<span class="tab-badge"></span>';
+
+      return `<button class="tab" role="tab" aria-selected="${active}" aria-current="${active ? "page" : "false"}"
+        data-nav="${item.id}" aria-label="${item.label}">
+        ${icon(item.icon, 22)}
+        <span>${item.label}</span>
+        ${badge}
+      </button>`;
+    }).join("");
+
+    const snavHtml = NAV_ITEMS.map((item) => {
+      const active = item.id === cur;
+      return `<button data-nav="${item.id}" aria-current="${active ? "page" : "false"}">
+        ${icon(item.icon, 20)}
+        <span>${item.label}</span>
+      </button>`;
+    }).join("");
+
+    $("#tabbar").innerHTML = tabsHtml;
+    $("#snav").innerHTML = snavHtml;
+  }
+
+  function go(viewId) {
+    if (!viewId || state.ui.view === viewId) return;
+    state.ui.view = viewId;
+    save();
+    renderCurrent();
+    renderNav();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function renderCurrent() {
+    $$(".view").forEach((v) => v.classList.remove("active"));
+    const cur = state.ui.view || "home";
+    const el = $("#view-" + cur);
+    if (el) el.classList.add("active");
+
+    switch (cur) {
+      case "home": renderHome(); break;
+      case "meals": renderMeals(); break;
+      case "walk": renderWalk(); break;
+      case "progress": renderProgress(); break;
+      case "profile": renderProfile(); break;
+    }
+  }
+
+  /* =========================================================
+     HOME DASHBOARD
+     ========================================================= */
+  function elapsedOf(aw) {
+    if (!aw) return 0;
+    let ms = aw.accumulatedMs || 0;
+    if (aw.running && aw.runStartedAt) ms += Date.now() - aw.runStartedAt;
+    return Math.max(0, ms);
+  }
+  function getActive() {
+    return state.days[todayKey()] ? state.days[todayKey()].active : null;
+  }
+
+  function renderHabitList(key) {
+    const h = habitsFor(key);
+    return `<div class="stack" style="gap:8px">${HABITS.map((item) => {
+      const st = h[item.key];
+      const atStr = st.at ? fmtTime(st.at) : "";
+
+      return `<div class="habit-item ${st.done ? "done" : ""}">
+        <button class="habit-check-btn ${st.done ? "checked" : ""}" data-action="toggle-habit" data-habit="${item.key}"
+          aria-label="${item.label}: ${st.done ? "Marked complete" : "Tap to complete"}">
+          ${icon("check", 16)}
+        </button>
+        <div class="habit-main">
+          <div class="habit-title">${item.label}</div>
+          <div class="habit-sub ${st.done ? "highlight" : ""}">
+            ${st.done ? `${icon("check", 12)} Completed ${atStr ? "at " + atStr : ""}` : "Tap checkbox to mark complete"}
+          </div>
+        </div>
+        ${item.key === "sleep" ? `<button class="btn btn-ghost btn-sm" data-action="log-sleep" style="padding:0 8px;font-size:11.5px">${icon("clock", 13)} Times</button>` : ""}
+      </div>`;
+    }).join("")}</div>`;
+  }
+
+  function renderHomeWalkingCards(key) {
+    const d = getDay(key);
+    const aw = getActive();
+    const goal = state.profile.walkSessionGoal;
+
+    return ["lunch", "evening"].map((type) => {
+      const meta = WALK_TYPES[type];
+      const w = d.walks[type];
+      const mins = w.minutes || 0;
+      const done = mins >= goal;
+      const isActive = aw && aw.type === type;
+
+      if (isActive) {
+        const el = elapsedOf(aw);
+        const livePct = clamp(el / 60000 / goal, 0, 1);
+        return `<div class="card tint-sage" style="margin-bottom:12px;border-color:var(--sage-500)">
+          <div class="card-head">
+            <div>
+              <div class="card-title">${meta.label} · in progress</div>
+              <div class="card-sub">Goal ${goal} minutes · ${aw.running ? "timer running" : "paused"}</div>
+            </div>
+            <span class="pill sage">${aw.running ? "Live Timer" : "Paused"}</span>
+          </div>
+          <div class="row" style="gap:16px;align-items:center;flex-wrap:wrap">
+            <div class="ring-wrap live-walk-ring" style="width:84px;height:84px">
+              ${ringSvg(livePct, { size: 84, stroke: 8, color: "var(--sage-600)", label: meta.label })}
+              <div class="ring-center"><div class="ring-val live-walk-pct" style="font-size:16px">${Math.round(livePct * 100)}%</div></div>
+            </div>
+            <div style="flex:1;min-width:160px">
+              <div class="timer lg live-walk-timer" style="font-size:36px">${fmtClock(el)}</div>
+              <div class="hint" style="margin-top:4px">Target: ${goal} minutes. Finish whenever you like.</div>
+              <div class="actions" style="margin-top:10px">
+                <button class="btn ${aw.running ? "btn-soft" : "btn-sage"} btn-sm" data-action="walk-toggle">
+                  ${icon(aw.running ? "pause" : "play", 14)} ${aw.running ? "Pause" : "Resume"}
+                </button>
+                <button class="btn btn-primary btn-sm" data-action="walk-stop">
+                  ${icon("stop", 14)} Stop Walk
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>`;
+      }
+
+      return `<div class="card ${done ? "tint-sage" : ""}" style="margin-bottom:10px">
+        <div class="card-head">
+          <div>
+            <div class="card-title">${type === "lunch" ? "Walk 1: After lunch" : "Walk 2: After dinner"}</div>
+            <div class="card-sub">${goal} min target · ${mins > 0 ? mins + " min logged" : "Supports steady post-meal glucose"}</div>
+          </div>
+          <span class="pill ${done ? "sage" : mins > 0 ? "blush" : "plain"}">${done ? "Completed ✓" : mins > 0 ? `${mins}m / ${goal}m` : "Ready"}</span>
+        </div>
+        <div class="row" style="justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+          <div class="row" style="gap:10px">
+            <span class="ach-icon" style="background:${done ? "var(--sage-soft)" : "var(--surface-2)"};color:${done ? "var(--sage-600)" : "var(--plum-soft)"}">${icon("walk", 18)}</span>
+            <div style="font-size:13px;color:var(--plum-soft)">${done ? "Session goal reached! Extra walks still count." : mins > 0 ? `${goal - mins} minutes left to meet session goal.` : "30-minute steady walk after your meal."}</div>
+          </div>
+          <div class="row" style="gap:8px">
+            <button class="btn btn-sage btn-sm" data-action="walk-start" data-walk="${type}">
+              ${icon("play", 14)} ${done ? "Walk Again" : meta.start}
+            </button>
+          </div>
+        </div>
+      </div>`;
+    }).join("");
+  }
+
+  function renderHome() {
+    const key = todayKey();
+    const d = getDay(key);
+    const p = overallPct(key);
+    const wkStart = startOfWeek(today());
+    const dayNo = Math.round((today() - wkStart) / 86400000) + 1;
+    const mins = walkMinutes(key);
+    const steps = d.steps;
+
+    const mealsPct = mealPct(key);
+    const wPct = walkPct(key);
+    const hPct = waterPct(key);
+    const habPct = habitPct(key);
+
+    const stepMetric = steps != null
+      ? `<div class="stat-val">${steps.toLocaleString()}<small> steps</small></div>
+         <div class="stat-note">${d.stepsSource === "manual" ? sourceBadge("Manual entry", "lav") : d.stepsSource === "pedometer" ? sourceBadge("Phone sensor", "sage") : sourceBadge("Sample data", "plain")}</div>`
+      : `<div class="stat-val" style="font-size:13.5px;color:var(--plum-faint);font-weight:600">Not connected</div>
+         <div class="stat-note"><button class="btn btn-ghost btn-sm" style="min-height:28px;padding:0 8px;font-size:11px" data-action="connect-tracker">Connect</button>
+         <button class="btn btn-ghost btn-sm" style="min-height:28px;padding:0 8px;font-size:11px" data-action="manual-steps">Manual</button></div>`;
+
+    const dist = distanceKm(key);
+    const kcal = kcalBurned(key);
+    const hasActivity = mins > 0 || steps != null;
+
+    $("#view-home").innerHTML = `
+      <h1 id="homeTitle" class="sr-only">Today's dashboard</h1>
+
+      <!-- Hero Card -->
+      <div class="card tint-blush" style="margin-bottom:14px">
+        <div class="row" style="justify-content:space-between;align-items:flex-start;gap:10px">
+          <div>
+            <div class="eyebrow">${fmtDateLong(today())}</div>
+            <h2 style="font-size:20px;font-weight:800;letter-spacing:-.03em;margin-top:4px;line-height:1.25">Your wellness journey, one day at a time 💗</h2>
+          </div>
+          <span class="pill blush">Day ${dayNo} of 7</span>
+        </div>
+
+        <div class="hero" style="margin-top:16px">
+          <div class="hero-ring">
+            ${ringBlock(p, { size: 120, stroke: 11, color: "var(--blush-500)", big: Math.round(p * 100) + "%", sub: "today", label: "Daily completion percentage" })}
+          </div>
+          <div class="hero-copy">
+            <div class="stat-lab" style="margin-bottom:6px">${icon("sparkle", 13)} Daily consistency</div>
+            <div style="font-size:13.5px;line-height:1.5;color:var(--plum-soft)" id="motivation">${motivationalMessage(key)}</div>
+            <div class="bar blush thin" style="margin-top:12px" role="progressbar" aria-valuenow="${Math.round(p * 100)}" aria-valuemin="0" aria-valuemax="100">
+              <span style="width:${Math.round(p * 100)}%"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="rings-4" style="margin-top:18px">
+          <div class="mini">
+            ${ringBlock(mealsPct, { size: 60, stroke: 6.5, color: "var(--blush-500)", big: Math.round(mealsPct * 100) + "%", label: "Meals" })}
+            <div class="ring-lab">Meals</div>
+          </div>
+          <div class="mini">
+            ${ringBlock(wPct, { size: 60, stroke: 6.5, color: "var(--sage-500)", big: Math.round(wPct * 100) + "%", label: "Walking" })}
+            <div class="ring-lab">Walking</div>
+          </div>
+          <div class="mini">
+            ${ringBlock(hPct, { size: 60, stroke: 6.5, color: "var(--lavender-500)", big: Math.round(hPct * 100) + "%", label: "Hydration" })}
+            <div class="ring-lab">Water</div>
+          </div>
+          <div class="mini">
+            ${ringBlock(habPct, { size: 60, stroke: 6.5, color: "var(--plum)", big: Math.round(habPct * 100) + "%", label: "Habits" })}
+            <div class="ring-lab">Habits</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="content-wide">
+        <div class="stack">
+          <!-- Walking Dashboard Card -->
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <div class="card-title">Today's walking</div>
+                <div class="card-sub">${mins} of ${state.profile.walkDailyGoal} min daily goal · two 30-min sessions</div>
+              </div>
+              <span class="pill ${mins >= state.profile.walkDailyGoal ? "sage" : ""}">${Math.round(wPct * 100)}%</span>
+            </div>
+
+            <div class="bar" role="progressbar" aria-valuenow="${Math.min(100, Math.round(wPct * 100))}" aria-valuemin="0" aria-valuemax="100">
+              <span style="width:${Math.min(100, Math.round(wPct * 100))}%"></span>
+            </div>
+
+            <div class="stats-4" style="margin-top:14px">
+              <div class="stat">
+                <div class="stat-lab">${icon("steps", 13)} Steps</div>
+                ${stepMetric}
+              </div>
+              <div class="stat">
+                <div class="stat-lab">${icon("walk", 13)} Distance</div>
+                <div class="stat-val">${dist > 0 ? round1(dist) : "—"}<small> km</small></div>
+                <div class="stat-note">${dist > 0 ? (distanceIsMeasured(key) ? sourceBadge("From steps", "sage") : sourceBadge("Estimate", "plain")) : "No walk yet"}</div>
+              </div>
+              <div class="stat">
+                <div class="stat-lab">${icon("clock", 13)} Active time</div>
+                <div class="stat-val">${mins}<small> min</small></div>
+                <div class="stat-note">${mins > 0 ? sourceBadge("From sessions", "sage") : "60m target"}</div>
+              </div>
+              <div class="stat">
+                <div class="stat-lab">${icon("flame", 13)} Calories</div>
+                <div class="stat-val">${hasActivity ? Math.round(kcal) : "—"}<small> kcal</small></div>
+                <div class="stat-note">${hasActivity ? sourceBadge("Approx.", "plain") : "Needs activity"}</div>
+              </div>
+            </div>
+
+            <div style="margin-top:16px">
+              <div class="label" style="margin-bottom:8px">Scheduled walking sessions</div>
+              ${renderHomeWalkingCards(key)}
+            </div>
+          </div>
+
+          <!-- Quick Access Actions -->
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <div class="card-title">Quick access</div>
+                <div class="card-sub">Fast logging for daily wellness habits</div>
+              </div>
+            </div>
+            <div class="row wrap" style="gap:8px">
+              <button class="btn btn-sage btn-sm" data-action="walk-start" data-walk="${getDay(key).walks.lunch.minutes >= state.profile.walkSessionGoal ? "evening" : "lunch"}">
+                ${icon("play", 15)} Start ${getDay(key).walks.lunch.minutes >= state.profile.walkSessionGoal ? "Evening" : "Lunch"} Walk
+              </button>
+              <button class="btn btn-blush btn-sm" data-action="quick-log-meal">
+                ${icon("plus", 15)} Log meal / snack
+              </button>
+              <button class="btn btn-soft btn-sm" data-nav="meals">
+                ${icon("meal", 15)} 7-day plan
+              </button>
+              <button class="btn btn-lav btn-sm" data-action="water-plus">
+                ${icon("water", 15)} +1 Glass water
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="stack">
+          <!-- Daily Habit Checklist -->
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <div class="card-title">Daily habit checklist</div>
+                <div class="card-sub">${completedHabits(key)} of ${HABITS.length} completed today</div>
+              </div>
+              <button class="btn btn-ghost btn-sm" data-nav="progress">${icon("chart", 14)} Summary</button>
+            </div>
+            ${renderHabitList(key)}
+          </div>
+
+          <!-- Hydration Card -->
+          <div class="card tint-lav" style="padding:16px">
+            <div class="eyebrow" style="margin-bottom:6px">Hydration tracker</div>
+            <div class="row" style="justify-content:space-between;align-items:center">
+              <div style="font-size:22px;font-weight:800;letter-spacing:-.02em">
+                ${d.water}<span style="font-size:13px;color:var(--plum-faint);font-weight:600"> / ${state.profile.waterGlasses} glasses</span>
+              </div>
+              <div class="stepper">
+                <button data-action="water-minus" aria-label="Remove one glass" ${d.water <= 0 ? "disabled" : ""}>${icon("minus", 16)}</button>
+                <span class="v">${d.water * (state.profile.waterGlassMl || 250)} ml</span>
+                <button data-action="water-plus" aria-label="Add one glass">${icon("plus", 16)}</button>
+              </div>
+            </div>
+            <div class="bar lav" style="margin-top:12px"><span style="width:${Math.min(100, Math.round(waterPct(key) * 100))}%"></span></div>
+            <div class="hint" style="margin-top:8px">Target: ${state.profile.waterGlasses} glasses (${state.profile.waterGlasses * 250} ml). Water flushes excess sodium and supports cellular hydration.</div>
+          </div>
+
+          <!-- Sleep Card -->
+          <div class="card" style="padding:16px">
+            <div class="row" style="justify-content:space-between;align-items:center">
+              <div>
+                <div class="card-title" style="font-size:15px">Sleep &amp; rest</div>
+                <div class="card-sub">${d.sleep.bed && d.sleep.wake ? `${d.sleep.bed} to ${d.sleep.wake} · ${sleepHoursFor(key)} hrs` : "Not logged yet"}</div>
+              </div>
+              <button class="btn btn-soft btn-sm" data-action="log-sleep">${icon("edit", 14)} Edit</button>
+            </div>
+            <div class="switch-row" style="margin-top:10px;padding:0">
+              <div class="switch-text">
+                <div class="switch-title" style="font-size:13px">Sleep routine followed</div>
+                <div class="switch-desc" style="font-size:11px">Screens away, dim lights, consistent schedule</div>
+              </div>
+              <label class="switch" aria-label="Sleep routine followed">
+                <input type="checkbox" data-habit="sleep" ${d.sleep.routine ? "checked" : ""}>
+                <span class="track"></span><span class="thumb"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    if (getActive()) startTimerLoop();
+  }
+
+  /* =========================================================
+     SEVEN-DAY MEAL PLAN
+     ========================================================= */
+  function renderMeals() {
+    const wkStart = startOfWeek(today());
+    const dates = Array.from({ length: 7 }, (_, i) => iso(addDays(wkStart, i)));
+    if (dates.indexOf(state.ui.mealsDay) === -1) state.ui.mealsDay = todayKey();
+    const sel = state.ui.mealsDay;
+    const idx = dayIndex(parseISO(sel));
+    const day = getDay(sel);
+    const plan = PLAN[idx];
+    const eaten = mealsEaten(sel);
+    const planned = mealsPlannedFor(sel);
+    const filter = state.ui.mealsFilter || "all";
+
+    const diary = day.foods.slice();
+
+    // Filter meals for view
+    const visibleSlots = MEAL_SLOTS.filter((slot) => {
+      const item = plan[slot.key];
+      if (!item) return false;
+      const isEaten = !!day.meals[slot.key].eaten;
+      if (filter === "completed") return isEaten;
+      if (filter === "remaining") return !isEaten;
+      return true;
+    });
+
+    $("#view-meals").innerHTML = `
+      <div class="row" style="justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+        <div>
+          <h1 id="mealsTitle" style="font-size:22px;font-weight:800;letter-spacing:-.03em">Seven-day meal chart</h1>
+          <div class="card-sub">Vegetarian, PCOS-friendly, flexible portions</div>
+        </div>
+        <span class="pill sage">${eaten} of ${planned} eaten</span>
+      </div>
+
+      <!-- Monday through Sunday tabs -->
+      <div class="daytabs" role="tablist" aria-label="Choose a day">
+        ${dates.map((key) => {
+          const i = dayIndex(parseISO(key));
+          const done = mealsEaten(key) === mealsPlannedFor(key) && mealsPlannedFor(key) > 0;
+          return `<button class="daytab ${key === todayKey() ? "today" : ""}" role="tab" aria-selected="${key === sel}"
+            data-action="select-day" data-day="${key}" aria-label="${DAY_NAMES[i]} ${fmtDateShort(parseISO(key))}">
+            <span class="dn">${DAY_SHORT[i]}</span>
+            <span style="font-size:11px;font-weight:700">${parseISO(key).getDate()}</span>
+            ${done ? '<span class="dot" aria-label="All meals completed"></span>' : ""}
+          </button>`;
+        }).join("")}
+      </div>
+
+      <!-- Day Summary & Filters -->
+      <div class="card" style="margin-bottom:14px">
+        <div class="row" style="justify-content:space-between;flex-wrap:wrap;gap:10px">
+          <div>
+            <div class="card-title" style="font-size:17px">${DAY_NAMES[idx]}, ${fmtDateShort(parseISO(sel))}</div>
+            <div class="card-sub">${eaten} of ${planned} meals eaten · No extreme restrictions</div>
+          </div>
+          <div class="row" style="gap:8px;flex-wrap:wrap">
+            <button class="btn btn-ghost btn-sm" data-action="open-laddu">${icon("food", 15)} Laddu calculator</button>
+            <button class="btn btn-blush btn-sm" data-action="quick-log-meal">${icon("plus", 15)} Quick log food</button>
+          </div>
+        </div>
+        <div class="bar blush thin" style="margin-top:12px"><span style="width:${Math.round(mealPct(sel) * 100)}%"></span></div>
+
+        <!-- Filter bar to view completed meals -->
+        <div class="row" style="justify-content:space-between;align-items:center;margin-top:14px;flex-wrap:wrap;gap:8px">
+          <div class="filter-bar" role="group" aria-label="Filter meals">
+            <button class="filter-btn" data-action="filter-meals" data-filter="all" aria-pressed="${filter === "all"}">All meals (${planned})</button>
+            <button class="filter-btn" data-action="filter-meals" data-filter="completed" aria-pressed="${filter === "completed"}">Completed (${eaten})</button>
+            <button class="filter-btn" data-action="filter-meals" data-filter="remaining" aria-pressed="${filter === "remaining"}">Remaining (${planned - eaten})</button>
+          </div>
+          <div class="hint" style="font-size:11.5px">Tick "Eaten" when you finish each meal</div>
+        </div>
+      </div>
+
+      <!-- Meals Stack -->
+      <div class="stack" style="margin-bottom:16px">
+        ${visibleSlots.length === 0 ? `
+          <div class="card empty" style="text-align:center;padding:28px">
+            <div style="font-weight:700;color:var(--plum-soft)">No meals found for this filter</div>
+            <div class="hint" style="margin-top:4px">${filter === "completed" ? "Mark a meal as eaten below to see it here." : "All meals for this day are marked eaten!"}</div>
+          </div>
+        ` : visibleSlots.map((slot) => {
+          const item = plan[slot.key];
+          const m = day.meals[slot.key];
+          return `<div class="meal ${m.eaten ? "done" : ""}">
+            <div class="meal-top">
+              <button class="meal-eaten-btn ${m.eaten ? "checked" : ""}" data-action="toggle-meal" data-slot="${slot.key}"
+                aria-label="Mark ${slot.label} as eaten">
+                ${icon("check", 14)}
+                <span>Eaten</span>
+              </button>
+              <div style="flex:1;min-width:0">
+                <div class="row" style="justify-content:space-between;align-items:flex-start;gap:8px">
+                  <div>
+                    <div class="meal-name">
+                      <span class="txt">${item.name}</span>
+                      ${m.eaten ? `<span class="pill sage" style="font-size:10px;padding:2px 8px">${icon("check", 11)} Eaten</span>` : ""}
+                    </div>
+                    <div class="row" style="gap:6px;margin-top:4px;flex-wrap:wrap">
+                      <span class="pill plain" style="font-size:10.5px;padding:2px 8px">${slot.label}</span>
+                      <span class="meal-portion">${item.portion}</span>
+                    </div>
+                  </div>
+                  <span class="meal-time">${slot.window}</span>
+                </div>
+                <div class="meal-desc">${item.desc}</div>
+                <div class="meal-foot">
+                  <input class="meal-note" data-note="${slot.key}" value="${escapeAttr(m.note || "")}"
+                    placeholder="Notes: substitutions, hunger level, how you felt…" aria-label="Notes for ${slot.label}">
+                  ${m.at ? `<span class="hint" style="font-size:11.5px">${m.eaten ? "Logged at " + fmtTime(m.at) : ""}</span>` : ""}
+                </div>
+              </div>
+            </div>
+          </div>`;
+        }).join("")}
+      </div>
+
+      <!-- Food Diary Section -->
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Daily food diary · ${DAY_SHORT[idx]}</div>
+            <div class="card-sub">Snacks and foods logged outside the meal chart</div>
+          </div>
+          <button class="btn btn-soft btn-sm" data-action="quick-log-meal">${icon("plus", 14)} Add food</button>
+        </div>
+        ${diary.length === 0
+          ? `<div class="empty" style="text-align:center;padding:16px;color:var(--plum-faint)">No custom food logged for this day. Use "Quick log food" for unexpected snacks or tiffins.</div>`
+          : `<div class="list">${diary.map((f) => `
+              <div class="list-item" style="padding:10px 0;border-bottom:1px solid var(--line)">
+                <div class="row" style="justify-content:space-between;align-items:center">
+                  <div class="row" style="gap:10px">
+                    <span class="ach-icon" style="background:var(--blush-soft);color:var(--blush-600)">${icon("food", 16)}</span>
+                    <div>
+                      <div style="font-weight:700;font-size:14px">${escapeHtml(f.name)}</div>
+                      <div class="hint" style="font-size:12px">${escapeHtml(f.portion || "Standard portion")}${f.note ? " · " + escapeHtml(f.note) : ""} · ${fmtTime(f.at)}</div>
+                    </div>
+                  </div>
+                  <button class="btn btn-ghost btn-icon btn-sm" data-action="delete-food" data-id="${f.id}" aria-label="Delete ${escapeAttr(f.name)}">${icon("trash", 15)}</button>
+                </div>
+              </div>`).join("")}</div>`}
+      </div>
+
+      <!-- Homemade Laddu Batches Section -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Homemade laddu batches</div>
+            <div class="card-sub">Atta, til (sesame), gond &amp; dry-fruit batches</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" data-action="open-laddu">${icon("plus", 14)} New batch</button>
+        </div>
+        ${state.ladduBatches.length === 0
+          ? `<div class="empty" style="text-align:center;padding:16px;color:var(--plum-faint)">No batches saved yet. Enter your recipe ingredients to calculate nutrition per laddu!</div>`
+          : `<div class="stack" style="gap:10px">${state.ladduBatches.map((b) => {
+              const per = perLaddu(b);
+              return `<div class="card tint-lav" style="padding:14px">
+                <div class="row" style="justify-content:space-between;align-items:flex-start">
+                  <div>
+                    <div style="font-weight:800;font-size:15px">${escapeHtml(b.name)} ${b.sample ? '<span class="pill plain" style="font-size:9px">Sample</span>' : ""}</div>
+                    <div style="font-size:12px;color:var(--plum-soft);margin-top:2px">${b.count} laddus batch · ≈${per.kcal} kcal, ${per.protein}g protein, ${per.fibre}g fibre, ${per.iron}mg iron each</div>
+                  </div>
+                  <div class="row" style="gap:6px">
+                    <button class="btn btn-blush btn-sm" data-action="log-laddu" data-id="${b.id}" style="padding:0 12px;font-size:12px">Log 1 Laddu</button>
+                    <button class="btn btn-ghost btn-icon btn-sm" data-action="delete-laddu" data-id="${b.id}">${icon("trash", 14)}</button>
+                  </div>
+                </div>
+              </div>`;
+            }).join("")}</div>`}
+        <div class="hint" style="margin-top:10px">Nutritional estimates are approximate, based on standard raw ingredient averages.</div>
+      </div>
+    `;
+  }
+
+  function perLaddu(batch) {
+    let totKcal = 0, totProt = 0, totFibre = 0, totFat = 0, totIron = 0;
+    (batch.ingredients || []).forEach((item) => {
+      const ing = INGREDIENTS.find((x) => x.name === item.name);
+      if (ing && item.grams > 0) {
+        const factor = item.grams / 100;
+        totKcal += (ing.kcal || 0) * factor;
+        totProt += (ing.protein || 0) * factor;
+        totFibre += (ing.fibre || 0) * factor;
+        totFat += (ing.fat || 0) * factor;
+        totIron += (ing.iron || 0) * factor;
+      }
+    });
+    const c = Math.max(1, batch.count || 1);
+    return {
+      kcal: Math.round(totKcal / c),
+      protein: round1(totProt / c),
+      fibre: round1(totFibre / c),
+      fat: round1(totFat / c),
+      iron: round1(totIron / c),
+      totalKcal: Math.round(totKcal),
+    };
+  }
+
+  /* =========================================================
+     WALK SCREEN
+     ========================================================= */
+  function renderWalk() {
+    const key = todayKey();
+    const d = getDay(key);
+    const aw = getActive();
+    const goal = state.profile.walkSessionGoal;
+
+    const sessionCard = (type) => {
+      const meta = WALK_TYPES[type];
+      const w = d.walks[type];
+      const mins = w.minutes || 0;
+      const done = mins >= goal;
+      const isActive = aw && aw.type === type;
+
+      if (isActive) {
+        const el = elapsedOf(aw);
+        const livePct = clamp(el / 60000 / goal, 0, 1);
+        return `<div class="card tint-sage" style="border:1.5px solid var(--sage-500);margin-bottom:14px">
+          <div class="card-head">
+            <div>
+              <div class="card-title">${meta.label} · in progress</div>
+              <div class="card-sub">Goal ${goal} minutes · ${aw.running ? "timer active" : "paused"}</div>
+            </div>
+            <span class="pill sage">${aw.running ? "Live Timer" : "Paused"}</span>
+          </div>
+          <div class="row" style="gap:20px;align-items:center;flex-wrap:wrap">
+            <div class="ring-wrap live-walk-ring" style="width:100px;height:100px">
+              ${ringSvg(livePct, { size: 100, stroke: 10, color: "var(--sage-600)", label: "Live session progress" })}
+              <div class="ring-center"><div class="ring-val live-walk-pct" style="font-size:18px">${Math.round(livePct * 100)}%</div><div class="ring-lab">of ${goal}m</div></div>
+            </div>
+            <div style="flex:1;min-width:180px">
+              <div class="timer lg live-walk-timer" id="walkTimer">${fmtClock(el)}</div>
+              <div class="hint" style="margin-top:6px">Started at ${fmtTime(aw.startedAt)}. Every minute you walk counts.</div>
+              <div class="actions" style="margin-top:12px">
+                <button class="btn ${aw.running ? "btn-soft" : "btn-sage"} btn-sm" data-action="walk-toggle">
+                  ${icon(aw.running ? "pause" : "play", 15)} ${aw.running ? "Pause" : "Resume"}
+                </button>
+                <button class="btn btn-primary btn-sm" data-action="walk-stop">
+                  ${icon("stop", 15)} Stop Walk
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>`;
+      }
+
+      return `<div class="card ${done ? "tint-sage" : ""}" style="margin-bottom:14px">
+        <div class="card-head">
+          <div>
+            <div class="card-title">${meta.label}</div>
+            <div class="card-sub">${type === "lunch" ? "After lunch" : "After dinner"} · goal ${goal} minutes</div>
+          </div>
+          <span class="pill ${done ? "sage" : mins > 0 ? "blush" : "plain"}">${done ? "Complete ✓" : mins > 0 ? `${mins}m / ${goal}m` : "Not started"}</span>
+        </div>
+        <div class="row" style="gap:18px;align-items:center;flex-wrap:wrap">
+          <div class="ring-wrap" style="width:96px;height:96px">
+            ${ringSvg(clamp(mins / goal, 0, 1), { size: 96, stroke: 9, color: done ? "var(--sage-500)" : "var(--blush-500)", label: meta.label })}
+            <div class="ring-center"><div class="ring-val" style="font-size:19px">${mins}<span style="font-size:11px;font-weight:600">/${goal}</span></div><div class="ring-lab">minutes</div></div>
+          </div>
+          <div style="flex:1;min-width:180px">
+            <div class="hint" style="margin-bottom:10px">${
+              done ? "Session goal reached! A steady walk curbs postprandial glucose spikes."
+              : mins > 0 ? `You've walked ${mins} of ${goal} minutes. Partial walks are credited fully.`
+              : "Walking for 30 minutes after your meal promotes digestion and hormone balance."
+            }</div>
+            <div class="actions">
+              <button class="btn btn-sage btn-sm" data-action="walk-start" data-walk="${type}">
+                ${icon("play", 15)} ${done ? "Walk Again" : meta.start}
+              </button>
+              ${w.sessions.length > 0 ? `<button class="btn btn-ghost btn-sm" data-action="walk-detail" data-walk="${type}">History (${w.sessions.length})</button>` : ""}
+            </div>
+          </div>
+        </div>
+      </div>`;
+    };
+
+    const minutes = walkMinutes(key);
+    const dKm = distanceKm(key);
+    const kcal = kcalBurned(key);
+    const sessionCount = d.walks.lunch.sessions.length + d.walks.evening.sessions.length;
+
+    $("#view-walk").innerHTML = `
+      <h1 id="walkTitle" style="font-size:22px;font-weight:800;letter-spacing:-.03em;margin-bottom:2px">Walking tracker</h1>
+      <div class="card-sub" style="margin-bottom:14px">Two scheduled 30-min sessions daily · ${minutes} of ${state.profile.walkDailyGoal} minutes today</div>
+
+      <!-- Top Summary Card -->
+      <div class="card tint-blush" style="margin-bottom:14px">
+        <div class="row" style="gap:20px;flex-wrap:wrap;align-items:center">
+          <div class="ring-wrap" style="width:110px;height:110px">
+            ${ringSvg(walkPct(key), { size: 110, stroke: 11, color: "var(--sage-500)", label: "Daily walking progress" })}
+            <div class="ring-center"><div class="ring-val" style="font-size:24px">${minutes}<span style="font-size:12px;font-weight:600">m</span></div><div class="ring-lab">of ${state.profile.walkDailyGoal}m</div></div>
+          </div>
+          <div style="flex:1;min-width:180px">
+            <div class="stats-3">
+              <div class="stat" style="border:0;background:rgba(255,255,255,0.75)">
+                <div class="stat-lab">${icon("walk", 13)} Distance</div>
+                <div class="stat-val" style="font-size:16px">${dKm > 0 ? round1(dKm) : "—"}<small> km</small></div>
+                <div class="stat-note">${dKm > 0 ? (distanceIsMeasured(key) ? "From steps" : "Estimate") : "No walk"}</div>
+              </div>
+              <div class="stat" style="border:0;background:rgba(255,255,255,0.75)">
+                <div class="stat-lab">${icon("steps", 13)} Steps</div>
+                <div class="stat-val" style="font-size:16px">${d.steps != null ? d.steps.toLocaleString() : "—"}</div>
+                <div class="stat-note">${d.steps != null ? (d.stepsSource === "manual" ? "Manual" : d.stepsSource === "pedometer" ? "Sensor" : "Sample") : "Connect"}</div>
+              </div>
+              <div class="stat" style="border:0;background:rgba(255,255,255,0.75)">
+                <div class="stat-lab">${icon("flame", 13)} Calories</div>
+                <div class="stat-val" style="font-size:16px">${kcal > 0 ? Math.round(kcal) : "—"}</div>
+                <div class="stat-note">${kcal > 0 ? "Approx." : "No walk"}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stack" style="margin-bottom:14px">
+        ${sessionCard("lunch")}
+        ${sessionCard("evening")}
+      </div>
+
+      <div class="grid two">
+        <!-- Steps & Tracker Card -->
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Steps &amp; pedometer</div>
+              <div class="card-sub">Distinguishes actual device data from estimates</div>
+            </div>
+          </div>
+          ${d.steps != null ? `
+            <div class="row" style="justify-content:space-between;margin-bottom:10px">
+              <div>
+                <div class="stat-val">${d.steps.toLocaleString()}<small> steps</small></div>
+                <div class="stat-note">${d.stepsSource === "manual" ? sourceBadge("Manual entry", "lav") : d.stepsSource === "pedometer" ? sourceBadge("Phone pedometer", "sage") : sourceBadge("Sample data", "plain")}</div>
+              </div>
+              <button class="btn btn-ghost btn-sm" data-action="manual-steps">${icon("edit", 14)} Edit</button>
+            </div>
+            <div class="hint">Goal: ${state.profile.stepsGoal.toLocaleString()} steps · ${Math.round(clamp(d.steps / state.profile.stepsGoal, 0, 1) * 100)}%</div>
+            <div class="bar thin" style="margin-top:6px"><span style="width:${Math.round(clamp(d.steps / state.profile.stepsGoal, 0, 1) * 100)}%"></span></div>
+          ` : `
+            <div class="empty" style="margin-bottom:12px;color:var(--plum-soft)">No step sensor connected today. Connect phone pedometer or enter steps manually.</div>
+            <div class="row wrap" style="gap:8px">
+              <button class="btn btn-lav btn-sm" data-action="connect-tracker">${icon("phone", 14)} Connect tracker / pedometer</button>
+              <button class="btn btn-soft btn-sm" data-action="manual-steps">${icon("edit", 14)} Enter manually</button>
+            </div>
+          `}
+          <div style="border-top:1px solid var(--line);margin-top:12px;padding-top:10px">
+            <div class="hint"><strong>Important distinction:</strong> Timer duration is actual walking time. Calorie estimates are approximate based on moderate 3.3 MET walking. Step counts require a pedometer or manual log.</div>
+          </div>
+        </div>
+
+        <!-- Saved Sessions Card -->
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Saved sessions today</div>
+              <div class="card-sub">${sessionCount} ${sessionCount === 1 ? "session" : "sessions"} logged</div>
+            </div>
+          </div>
+          ${sessionCount === 0 ? `<div class="empty" style="color:var(--plum-faint)">No sessions saved yet today. Tap Start Walk above to begin.</div>` :
+            `<div class="list">${["lunch", "evening"].flatMap((type) =>
+              d.walks[type].sessions.map((s) => `
+                <div class="list-item" style="padding:10px 0;border-bottom:1px solid var(--line)">
+                  <div class="row" style="justify-content:space-between;align-items:center">
+                    <div class="row" style="gap:10px">
+                      <span class="ach-icon" style="background:var(--sage-soft);color:var(--sage-600)">${icon("walk", 16)}</span>
+                      <div>
+                        <div style="font-weight:700;font-size:14px">${WALK_TYPES[type].label} · ${s.minutes} min</div>
+                        <div class="hint" style="font-size:12px">${fmtTime(s.start)} – ${fmtTime(s.end)}${s.sample ? " · Sample" : ""}</div>
+                      </div>
+                    </div>
+                    <span class="pill ${s.complete ? "sage" : "plain"}">${s.complete ? "Goal met" : "Partial (" + s.minutes + "m)"}</span>
+                  </div>
+                </div>`)
+            ).join("")}</div>`}
+          <div class="hint" style="margin-top:10px">Walks under 30 minutes are recorded at their actual duration — never falsely rounded up.</div>
+        </div>
+      </div>
+    `;
+
+    if (aw) startTimerLoop();
+  }
+
+  /* =========================================================
+     PROGRESS & WEEKLY REPORT
+     ========================================================= */
+  function renderProgress() {
+    const range = state.ui.progressRange || "week";
+    const now = today();
+    const wkStart = startOfWeek(now);
+    const weekKeys = Array.from({ length: 7 }, (_, i) => iso(addDays(wkStart, i)));
+
+    let scopeKeys = weekKeys;
+    let rangeLabel = "This 7-day week";
+    if (range === "day") {
+      scopeKeys = [todayKey()];
+      rangeLabel = "Today's summary";
+    } else if (range === "month") {
+      scopeKeys = [];
+      for (let offset = -29; offset <= 0; offset++) scopeKeys.push(iso(addDays(now, offset)));
+      rangeLabel = "Last 30 days";
+    }
+
+    const totalMeals = scopeKeys.reduce((a, k) => a + mealsEaten(k), 0);
+    const totalPlanned = scopeKeys.reduce((a, k) => a + mealsPlannedFor(k), 0);
+    const totalWalk = scopeKeys.reduce((a, k) => a + walkMinutes(k), 0);
+    const lunchWalk = scopeKeys.reduce((a, k) => a + (getDay(k).walks.lunch.minutes || 0), 0);
+    const eveningWalk = scopeKeys.reduce((a, k) => a + (getDay(k).walks.evening.minutes || 0), 0);
+
+    const daysWithSteps = scopeKeys.filter((k) => getDay(k).steps != null);
+    const totalSteps = daysWithSteps.reduce((a, k) => a + getDay(k).steps, 0);
+    const avgSteps = daysWithSteps.length ? Math.round(totalSteps / daysWithSteps.length) : null;
+
+    const totalHabits = scopeKeys.reduce((a, k) => a + completedHabits(k), 0);
+    const habitPossible = scopeKeys.length * HABITS.length;
+
+    const weights = state.weights.slice().sort((a, b) => a.date.localeCompare(b.date));
+
+    // 7-day series for chart
+    const walkSeries = weekKeys.map((k) => {
+      const d = getDay(k);
+      return {
+        lunch: d.walks.lunch.minutes || 0,
+        evening: d.walks.evening.minutes || 0,
+        total: (d.walks.lunch.minutes || 0) + (d.walks.evening.minutes || 0),
+      };
+    });
+    const maxWalk = Math.max(state.profile.walkDailyGoal, ...walkSeries.map((s) => s.total), 30);
+
+    $("#view-progress").innerHTML = `
+      <div class="row" style="justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+        <div>
+          <h1 id="progressTitle" style="font-size:22px;font-weight:800;letter-spacing:-.03em">Progress &amp; report</h1>
+          <div class="card-sub">${rangeLabel} · Focus on healthy habits, not daily weight fluctuations</div>
+        </div>
+        <div class="seg" role="group" aria-label="Choose timeframe">
+          <button data-action="range" data-range="day" aria-pressed="${range === "day"}">Daily</button>
+          <button data-action="range" data-range="week" aria-pressed="${range === "week"}">Weekly</button>
+          <button data-action="range" data-range="month" aria-pressed="${range === "month"}">Monthly</button>
+        </div>
+      </div>
+
+      <!-- 4 Overview Stats -->
+      <div class="stats-4" style="margin-bottom:14px">
+        <div class="stat">
+          <div class="stat-lab">${icon("meal", 13)} Meals eaten</div>
+          <div class="stat-val">${totalMeals}<small> / ${totalPlanned}</small></div>
+          <div class="bar blush thin" style="margin-top:8px"><span style="width:${totalPlanned ? Math.round((totalMeals / totalPlanned) * 100) : 0}%"></span></div>
+        </div>
+        <div class="stat">
+          <div class="stat-lab">${icon("walk", 13)} Walking time</div>
+          <div class="stat-val">${totalWalk}<small> min</small></div>
+          <div class="stat-note">${lunchWalk}m lunch + ${eveningWalk}m dinner</div>
+        </div>
+        <div class="stat">
+          <div class="stat-lab">${icon("steps", 13)} Avg steps</div>
+          <div class="stat-val">${avgSteps != null ? avgSteps.toLocaleString() : "—"}</div>
+          <div class="stat-note">${daysWithSteps.length} days with data</div>
+        </div>
+        <div class="stat">
+          <div class="stat-lab">${icon("check", 13)} Habits consistency</div>
+          <div class="stat-val">${Math.round(habitPossible ? (totalHabits / habitPossible) * 100 : 0)}<small>%</small></div>
+          <div class="stat-note">${totalHabits} of ${habitPossible} logged</div>
+        </div>
+      </div>
+
+      <!-- 7-Day Walking Minutes Chart -->
+      <div class="grid two-wide" style="margin-bottom:14px">
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">7-day walking minutes</div>
+              <div class="card-sub">Daily goal: ${state.profile.walkDailyGoal} min (30m lunch + 30m evening)</div>
+            </div>
+            <span class="pill sage">${totalWalk} min total</span>
+          </div>
+
+          <div class="chart" role="img" aria-label="Seven-day bar chart of walking minutes">
+            ${weekKeys.map((k, i) => {
+              const s = walkSeries[i];
+              const hLunch = Math.round((s.lunch / maxWalk) * 100);
+              const hEve = Math.round((s.evening / maxWalk) * 100);
+              const isToday = k === todayKey();
+              return `<div class="col ${isToday ? "today" : ""}">
+                <div class="track" title="${DAY_NAMES[i]}: ${s.total} min (${s.lunch}m lunch, ${s.evening}m evening)">
+                  <div class="fill-eve" style="height:${hEve}%"></div>
+                  <div class="fill-lunch" style="height:${hLunch}%"></div>
+                </div>
+                <span class="cv">${s.total}</span>
+                <span class="cd">${DAY_SHORT[i]}</span>
+              </div>`;
+            }).join("")}
+          </div>
+
+          <div class="row" style="gap:14px;justify-content:center;margin-top:10px;font-size:11.5px">
+            <div class="row" style="gap:5px"><span style="width:10px;height:10px;background:var(--sage-500);border-radius:2px"></span><span>Lunch walk</span></div>
+            <div class="row" style="gap:5px"><span style="width:10px;height:10px;background:var(--lavender-500);border-radius:2px"></span><span>Evening walk</span></div>
+            <div class="row" style="gap:5px"><span style="width:10px;height:10px;border:1.5px solid var(--blush-600);border-radius:2px"></span><span>Today</span></div>
+          </div>
+        </div>
+
+        <!-- Weight Trend Card (Optional) -->
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Weight trend (optional)</div>
+              <div class="card-sub">Focus on habits rather than daily fluctuations</div>
+            </div>
+            <button class="btn btn-ghost btn-sm" data-action="log-weight">${icon("plus", 14)} Record</button>
+          </div>
+          ${weights.length === 0
+            ? `<div class="empty" style="text-align:center;padding:16px;color:var(--plum-faint)">Weight tracking is completely optional. Habits and hormone balance matter far more.</div>`
+            : `${weightSparkline(weights)}
+               <div class="row" style="justify-content:space-between;margin-top:10px">
+                 <div>
+                   <div class="stat-lab">First logged</div>
+                   <div style="font-weight:800">${weights[0].kg} kg</div>
+                   <div class="hint">${fmtDateShort(parseISO(weights[0].date))}</div>
+                 </div>
+                 <div style="text-align:right">
+                   <div class="stat-lab">Latest</div>
+                   <div style="font-weight:800">${weights[weights.length - 1].kg} kg</div>
+                   <div class="hint">${fmtDateShort(parseISO(weights[weights.length - 1].date))}</div>
+                 </div>
+               </div>`
+          }
+          <div class="hint" style="margin-top:10px">Weight fluctuates normally with salt, water retention, and cycle phase. No target loss rate is promised.</div>
+        </div>
+      </div>
+
+      <!-- Habit Completion Matrix -->
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-head">
+          <div>
+            <div class="card-title">Habit completion by day</div>
+            <div class="card-sub">Week of ${fmtDateShort(wkStart)} · 8 core wellness habits</div>
+          </div>
+        </div>
+        <div class="habit-days" style="margin-bottom:6px">
+          <span></span>${DAY_SHORT.map((d) => `<span>${d}</span>`).join("")}
+        </div>
+        <div class="habit-grid">
+          ${HABITS.map((h) => `<div class="habit-row">
+            <span class="hl">${h.label}</span>
+            ${weekKeys.map((k) => {
+              const st = habitsFor(k)[h.key];
+              const future = parseISO(k) > today();
+              return `<span class="habit-dot ${future ? "future" : st.done ? "on" : "miss"}"
+                title="${DAY_SHORT[dayIndex(parseISO(k))]} · ${h.label}: ${future ? "upcoming" : st.done ? "completed" : "not completed"}">
+                ${st.done && !future ? icon("check", 12) : ""}
+              </span>`;
+            }).join("")}
+          </div>`).join("")}
+        </div>
+      </div>
+
+      <!-- Streaks & Compassionate PCOS Note -->
+      <div class="grid two">
+        <div class="card">
+          <div class="card-head">
+            <div><div class="card-title">Weekly streaks &amp; gentle milestones</div><div class="card-sub">Celebrating consistency, not perfection</div></div>
+          </div>
+          ${achievements().map((a) => `
+            <div class="ach ${a.earned ? "earned" : ""}">
+              <span class="ach-icon">${icon(a.icon, 18)}</span>
+              <div class="li-main">
+                <div class="ach-title">${a.title}</div>
+                <div class="ach-sub">${a.sub}</div>
+              </div>
+              ${a.earned ? '<span class="pill sage">Earned ✓</span>' : '<span class="pill plain">Gentle progress</span>'}
+            </div>`).join("")}
+        </div>
+
+        <div class="card tint-lav">
+          <div class="card-head">
+            <div><div class="card-title">PCOS Wellness Philosophy</div><div class="card-sub">Hormone balance over numbers</div></div>
+          </div>
+          <div style="font-size:13.5px;color:var(--plum-soft);line-height:1.55">
+            Managing PCOS is about nourishing your metabolism and soothing chronic low-grade inflammation.
+            Consistent post-meal walks regulate insulin sensitivity without stressing your adrenal system.
+            This application does not promise rapid weight loss or medical cures; it is a gentle companion for steady self-care.
+          </div>
+          <div style="border-top:1px solid var(--line);margin-top:14px;padding-top:10px">
+            <div class="hint">Always consult your endocrinologist or gynecologist for medical advice, medications, or diagnostic testing.</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function weightSparkline(weights) {
+    const pts = weights.slice(-8);
+    if (pts.length < 2) {
+      return `<div class="empty" style="padding:14px;text-align:center;color:var(--plum-faint)">Record at least 2 entries to see your trend curve.</div>`;
+    }
+    const vals = pts.map((p) => p.kg);
+    const min = Math.min(...vals) - 0.4;
+    const max = Math.max(...vals) + 0.4;
+    const w = 280, h = 64, pad = 8;
+    const coords = pts.map((p, i) => {
+      const x = pad + (i / (pts.length - 1)) * (w - pad * 2);
+      const y = h - pad - ((p.kg - min) / (max - min || 1)) * (h - pad * 2);
+      return [x, y];
+    });
+    const d = coords.map((c, i) => (i === 0 ? `M ${c[0]} ${c[1]}` : `L ${c[0]} ${c[1]}`)).join(" ");
+    return `<svg width="100%" height="${h}" viewBox="0 0 ${w} ${h}" style="overflow:visible">
+      <path d="${d}" fill="none" stroke="var(--plum)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+      ${coords.map((c) => `<circle cx="${c[0]}" cy="${c[1]}" r="4" fill="var(--blush-500)" stroke="#fff" stroke-width="2" />`).join("")}
+    </svg>`;
+  }
+
+  function achievements() {
+    const key = todayKey();
+    const d = getDay(key);
+    const wMins = walkMinutes(key);
+    return [
+      {
+        title: "Mindful Plate",
+        sub: "Logged meals consistently today",
+        icon: "meal",
+        earned: mealsEaten(key) >= 3,
+      },
+      {
+        title: "Post-Meal Walker",
+        sub: "Completed at least one 30-min walk session",
+        icon: "walk",
+        earned: (d.walks.lunch.minutes || 0) >= 30 || (d.walks.evening.minutes || 0) >= 30,
+      },
+      {
+        title: "Steady Hydration",
+        sub: "Drank 5 or more glasses of water",
+        icon: "water",
+        earned: d.water >= 5,
+      },
+      {
+        title: "Evening Wind-Down",
+        sub: "Followed consistent sleep routine",
+        icon: "sleep",
+        earned: !!d.sleep.routine,
+      },
+    ];
+  }
+
+  /* =========================================================
+     PROFILE SCREEN
+     ========================================================= */
+  function renderProfile() {
+    const p = state.profile;
+    const initial = (p.name || "A").trim().charAt(0).toUpperCase();
+
+    $("#view-profile").innerHTML = `
+      <h1 id="profileTitle" style="font-size:22px;font-weight:800;letter-spacing:-.03em;margin-bottom:2px">Profile &amp; preferences</h1>
+      <div class="card-sub" style="margin-bottom:14px">Customize your daily goals · all personal details are optional</div>
+
+      <!-- Avatar & Name -->
+      <div class="card" style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+        <div class="brand-mark" style="width:50px;height:50px;font-size:20px;font-weight:800">${escapeHtml(initial)}</div>
+        <div style="flex:1;min-width:0">
+          <div class="field">
+            <label class="label" for="p-name">Your Name</label>
+            <input class="input" id="p-name" data-profile="name" value="${escapeAttr(p.name)}" placeholder="e.g. Aarohi">
+          </div>
+        </div>
+      </div>
+
+      <div class="grid two" style="margin-bottom:14px">
+        <!-- Optional Measurements -->
+        <div class="card">
+          <div class="card-head">
+            <div><div class="card-title">Body measurements</div><div class="card-sub">Optional — used solely for stride &amp; calorie estimates</div></div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label class="label" for="p-weight">Weight (kg)</label>
+              <input class="input" id="p-weight" type="number" step="0.1" data-profile="weightKg" value="${p.weightKg || ""}" placeholder="Optional">
+            </div>
+            <div class="field">
+              <label class="label" for="p-height">Height (cm)</label>
+              <input class="input" id="p-height" type="number" step="1" data-profile="heightCm" value="${p.heightCm || ""}" placeholder="Optional">
+            </div>
+          </div>
+          <div class="field" style="margin-top:10px">
+            <label class="label" for="p-units">Measurement Units</label>
+            <select class="input" id="p-units" data-profile="units">
+              <option value="metric" ${p.units === "metric" ? "selected" : ""}>Metric (kg, cm, km)</option>
+              <option value="imperial" ${p.units === "imperial" ? "selected" : ""}>Imperial (lb, in, mi)</option>
+            </select>
+          </div>
+          <div class="switch-row" style="margin-top:8px">
+            <div class="switch-text">
+              <div class="switch-title">Hide weight from reports</div>
+              <div class="switch-desc">Hides the weight trend card in Progress view</div>
+            </div>
+            <label class="switch"><input type="checkbox" data-profile-toggle="hideWeight" ${p.privacy.hideWeight ? "checked" : ""}><span class="track"></span><span class="thumb"></span></label>
+          </div>
+        </div>
+
+        <!-- Diet & Personal Goals -->
+        <div class="card">
+          <div class="card-head">
+            <div><div class="card-title">Diet &amp; daily targets</div><div class="card-sub">Built for Indian PCOS wellness</div></div>
+          </div>
+          <div class="field" style="margin-bottom:10px">
+            <label class="label" for="p-diet">Dietary Preference</label>
+            <select class="input" id="p-diet" data-profile="diet">
+              <option value="vegetarian" ${p.diet === "vegetarian" ? "selected" : ""}>Vegetarian (Default)</option>
+              <option value="eggetarian" ${p.diet === "eggetarian" ? "selected" : ""}>Vegetarian + eggs</option>
+              <option value="vegan" ${p.diet === "vegan" ? "selected" : ""}>Vegan</option>
+            </select>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label class="label" for="p-dailywalk">Daily Walk Goal (min)</label>
+              <input class="input" id="p-dailywalk" type="number" step="5" data-profile="walkDailyGoal" value="${p.walkDailyGoal}">
+            </div>
+            <div class="field">
+              <label class="label" for="p-sessiongoal">Per Session (min)</label>
+              <input class="input" id="p-sessiongoal" type="number" step="5" data-profile="walkSessionGoal" value="${p.walkSessionGoal}">
+            </div>
+          </div>
+          <div class="field-row" style="margin-top:10px">
+            <div class="field">
+              <label class="label" for="p-water">Water Goal (glasses)</label>
+              <input class="input" id="p-water" type="number" step="1" data-profile="waterGlasses" value="${p.waterGlasses}">
+            </div>
+            <div class="field">
+              <label class="label" for="p-sleep">Sleep Goal (hours)</label>
+              <input class="input" id="p-sleep" type="number" step="0.5" data-profile="sleepGoal" value="${p.sleepGoal}">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notifications & Privacy -->
+      <div class="grid two" style="margin-bottom:14px">
+        <div class="card">
+          <div class="card-head">
+            <div><div class="card-title">Gentle notifications</div><div class="card-sub">Calm reminders for daily routine</div></div>
+          </div>
+          ${[
+            ["meals", "Meal windows", "Reminders around breakfast, lunch & dinner"],
+            ["walks", "Post-meal walk nudges", "Friendly prompt 30m after lunch and dinner"],
+            ["water", "Hydration reminders", "Regular sips throughout the day"],
+            ["sleep", "Wind-down routine", "Gentle alert 30 min before bedtime"],
+          ].map(([k, title, desc]) => `
+            <div class="switch-row">
+              <div class="switch-text"><div class="switch-title">${title}</div><div class="switch-desc">${desc}</div></div>
+              <label class="switch"><input type="checkbox" data-notif="${k}" ${p.notifications[k] ? "checked" : ""}><span class="track"></span><span class="thumb"></span></label>
+            </div>`).join("")}
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div><div class="card-title">Data &amp; privacy</div><div class="card-sub">Saved locally in your browser</div></div>
+          </div>
+          <div class="list-item" style="padding:10px 0;border-bottom:1px solid var(--line)">
+            <div class="row" style="justify-content:space-between">
+              <div>
+                <div style="font-weight:700">${Store.available ? "Local Browser Storage Active" : "In-Memory Storage"}</div>
+                <div class="hint">Your data stays completely private on your device.</div>
+              </div>
+              <span class="pill sage">${Store.available ? "Persistent" : "Session"}</span>
+            </div>
+          </div>
+          <div class="actions" style="margin-top:14px">
+            <button class="btn btn-soft btn-sm" data-action="export-data">${icon("sparkle", 14)} Export Data (JSON)</button>
+            <button class="btn btn-danger btn-sm" data-action="reset-data">${icon("trash", 14)} Reset All Data</button>
+          </div>
+          <div class="hint" style="margin-top:10px">Resetting clears local storage and re-seeds fresh sample demo data.</div>
+        </div>
+      </div>
+    `;
+  }
+
+  /* =========================================================
+     Walking Timer Loop
+     ========================================================= */
+  let timerId = null;
+  function startTimerLoop() {
+    if (timerId) return;
+    timerId = setInterval(() => {
+      const aw = getActive();
+      if (!aw) { stopTimerLoop(); return; }
+      const elapsed = elapsedOf(aw);
+
+      // Update all live walk timers across Home and Walk screens
+      $$(".live-walk-timer").forEach((el) => {
+        el.textContent = fmtClock(elapsed);
+      });
+
+      // Update live circular progress rings
+      const goal = state.profile.walkSessionGoal || 30;
+      const pct = clamp(elapsed / 60000 / goal, 0, 1);
+      $$(".live-walk-ring").forEach((ringWrap) => {
+        const ring = ringWrap.querySelector("circle:nth-of-type(2)");
+        if (ring) {
+          const size = parseFloat(ringWrap.style.width) || 100;
+          const stroke = ring.getAttribute("stroke-width") ? parseFloat(ring.getAttribute("stroke-width")) : 10;
+          const r = (size - stroke) / 2;
+          const c = 2 * Math.PI * r;
+          ring.setAttribute("stroke-dashoffset", String(c * (1 - pct)));
+        }
+        const pctEl = ringWrap.querySelector(".live-walk-pct");
+        if (pctEl) pctEl.textContent = Math.round(pct * 100) + "%";
+      });
+    }, 1000);
+  }
+
+  function stopTimerLoop() {
+    if (timerId) { clearInterval(timerId); timerId = null; }
+  }
+
+  /* =========================================================
+     Modal & Toast Helpers
+     ========================================================= */
+  let lastFocus = null;
+  function openModal(opts) {
+    lastFocus = document.activeElement;
+    const root = $("#modal-root");
+    root.innerHTML = `
+      <div class="modal-backdrop" data-modal-backdrop="true" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="sheet">
+          <div class="sheet-handle" aria-hidden="true"></div>
+          <div style="margin-bottom:14px">
+            <h2 id="modalTitle" style="font-size:18px;font-weight:800;letter-spacing:-.02em">${escapeHtml(opts.title || "")}</h2>
+            ${opts.sub ? `<div class="card-sub" style="margin-top:3px">${escapeHtml(opts.sub)}</div>` : ""}
+          </div>
+          <div class="modal-content">${opts.body || ""}</div>
+          <div class="actions" style="margin-top:18px;justify-content:flex-end">
+            ${(opts.actions || [{ label: "Close", kind: "btn-primary" }]).map((a, i) => `
+              <button class="btn ${a.kind || "btn-soft"} btn-sm" data-modal-action="${i}">${escapeHtml(a.label)}</button>
+            `).join("")}
+          </div>
+        </div>
+      </div>
+    `;
+
+    root.querySelectorAll("[data-modal-action]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const idx = Number(btn.getAttribute("data-modal-action"));
+        const act = (opts.actions || [])[idx];
+        if (act && typeof act.onClick === "function") {
+          const keepOpen = act.onClick();
+          if (keepOpen === true) return;
+        }
+        closeModal();
+      });
+    });
+
+    const first = root.querySelector("button, input, select, textarea");
+    if (first) first.focus();
+    document.addEventListener("keydown", onModalKeydown);
+  }
+
+  function onModalKeydown(e) {
+    if (e.key === "Escape") closeModal();
+  }
+  function closeModal() {
+    $("#modal-root").innerHTML = "";
+    document.removeEventListener("keydown", onModalKeydown);
+    if (lastFocus && typeof lastFocus.focus === "function") lastFocus.focus();
+  }
+
+  function toast(msg) {
+    const root = $("#toast-root");
+    const t = document.createElement("div");
+    t.className = "toast";
+    t.textContent = msg;
+    root.appendChild(t);
+    setTimeout(() => {
+      t.style.transition = "opacity 0.25s ease, transform 0.25s ease";
+      t.style.opacity = "0";
+      t.style.transform = "translateY(8px)";
+      setTimeout(() => t.remove(), 260);
+    }, 2400);
+  }
+
+  /* =========================================================
+     Walking Actions
+     ========================================================= */
+  function startWalk(type) {
+    const d = getDay(todayKey());
+    if (d.active) {
+      toast("A walk session is already in progress!");
+      return;
+    }
+    d.active = {
+      type,
+      startedAt: Date.now(),
+      accumulatedMs: 0,
+      running: true,
+      runStartedAt: Date.now(),
+    };
+    saveNow();
+    startTimerLoop();
+    renderCurrent();
+    renderNav();
+    toast(WALK_TYPES[type].label + " timer started! 🚶‍♀️");
+  }
+
+  function toggleWalk() {
+    const aw = getActive();
+    if (!aw) return;
+    if (aw.running) {
+      aw.accumulatedMs = elapsedOf(aw);
+      aw.running = false;
+      aw.runStartedAt = null;
+      stopTimerLoop();
+      toast("Walk timer paused");
+    } else {
+      aw.running = true;
+      aw.runStartedAt = Date.now();
+      startTimerLoop();
+      toast("Walk timer resumed");
+    }
+    saveNow();
+    renderCurrent();
+  }
+
+  function stopWalk() {
+    const aw = getActive();
+    if (!aw) return;
+    const elapsed = elapsedOf(aw);
+    const minutes = Math.max(1, Math.round(elapsed / 60000));
+    const goal = state.profile.walkSessionGoal;
+    const type = aw.type;
+
+    openModal({
+      title: "Save walking session?",
+      sub: `${WALK_TYPES[type].label} · ${dayLabel(todayKey())}`,
+      body: `
+        <div style="text-align:center;padding:10px 0 16px">
+          <div class="timer lg" style="font-size:42px">${fmtClock(elapsed)}</div>
+          <div class="hint" style="margin-top:6px;font-size:13.5px"><strong>${minutes} minute${minutes === 1 ? "" : "s"}</strong> walked of your ${goal}-minute goal</div>
+        </div>
+        <div class="stats-3">
+          <div class="stat"><div class="stat-lab">Start time</div><div class="stat-val" style="font-size:15px">${fmtTime(aw.startedAt)}</div></div>
+          <div class="stat"><div class="stat-lab">Duration</div><div class="stat-val" style="font-size:15px">${minutes} min</div></div>
+          <div class="stat"><div class="stat-lab">Session status</div><div class="stat-val" style="font-size:15px">${minutes >= goal ? "Goal Met ✓" : "Partial"}</div></div>
+        </div>
+        <div class="hint" style="margin-top:14px;line-height:1.5">
+          ${minutes >= goal
+            ? "Wonderful! You met your 30-minute session goal. These minutes are credited to your daily total."
+            : `Recorded at your real duration (${minutes} min) without rounding up. You will still receive full credit for these ${minutes} minutes walked toward your 60-minute daily goal.`
+          }
+        </div>
+      `,
+      actions: [
+        { label: "Keep walking", kind: "btn-soft" },
+        { label: "Save session & confirm", kind: "btn-sage", onClick: () => saveSession(type, minutes, elapsed) },
+        { label: "Discard walk", kind: "btn-danger", onClick: () => confirmDiscard() },
+      ],
+    });
+
+    function saveSession(tType, mins, totalMs) {
+      const rec = getDay(todayKey());
+      const end = Date.now();
+      rec.walks[tType].sessions.push({
+        id: uid(),
+        date: todayKey(),
+        start: aw.startedAt,
+        end,
+        minutes: mins,
+        complete: mins >= state.profile.walkSessionGoal,
+      });
+      rec.walks[tType].minutes = rec.walks[tType].sessions.reduce((a, s) => a + s.minutes, 0);
+      rec.active = null;
+      stopTimerLoop();
+      saveNow();
+      renderCurrent();
+      renderNav();
+      toast(`Walk session confirmed! +${mins} min credited ✓`);
+    }
+
+    function confirmDiscard() {
+      // Must ask for confirmation before discarding an active session per specification
+      setTimeout(() => {
+        openModal({
+          title: "Discard this session?",
+          sub: "Active walking session confirmation",
+          body: `
+            <div class="card tint-lav" style="padding:14px;margin-bottom:10px">
+              Are you sure you want to discard this walking session? Any time walked (${minutes} minutes) will not be saved.
+            </div>
+            <div class="hint">Tap "Keep Walking" to resume your session, or "Confirm Discard" to delete it.</div>
+          `,
+          actions: [
+            { label: "Keep walking", kind: "btn-sage", onClick: () => true },
+            {
+              label: "Confirm discard", kind: "btn-danger", onClick: () => {
+                const rec = getDay(todayKey());
+                rec.active = null;
+                stopTimerLoop();
+                saveNow();
+                renderCurrent();
+                renderNav();
+                toast("Walking session discarded");
+              },
+            },
+          ],
+        });
+      }, 150);
+      return true; // keep modal handling clean
+    }
+  }
+
+  function walkDetail(type) {
+    const d = getDay(todayKey());
+    const sessions = d.walks[type].sessions || [];
+    openModal({
+      title: `${WALK_TYPES[type].label} History`,
+      sub: `${dayLabel(todayKey())} · ${sessions.length} saved sessions`,
+      body: sessions.length === 0 ? `<div class="empty">No sessions logged yet for this slot.</div>` :
+        `<div class="list">${sessions.map((s) => `
+          <div class="list-item" style="padding:10px 0;border-bottom:1px solid var(--line)">
+            <div class="row" style="justify-content:space-between">
+              <div>
+                <div style="font-weight:700">${s.minutes} minutes</div>
+                <div class="hint">${fmtTime(s.start)} – ${fmtTime(s.end)}${s.sample ? " · Sample" : ""}</div>
+              </div>
+              <span class="pill ${s.complete ? "sage" : "plain"}">${s.complete ? "Goal met" : "Partial"}</span>
+            </div>
+          </div>`).join("")}</div>`,
+      actions: [{ label: "Close", kind: "btn-primary" }],
+    });
+  }
+
+  /* =========================================================
+     Habit Toggling Action
+     ========================================================= */
+  function toggleHabit(habitKey) {
+    const key = todayKey();
+    const d = getDay(key);
+    const goal = state.profile.walkSessionGoal;
+
+    switch (habitKey) {
+      case "breakfast":
+      case "lunch":
+      case "snack":
+      case "dinner": {
+        const next = !d.meals[habitKey].eaten;
+        d.meals[habitKey].eaten = next;
+        d.meals[habitKey].at = next ? Date.now() : null;
+        toast(next ? `${HABITS.find((h) => h.key === habitKey).label} marked! 💗` : "Meal habit unchecked");
+        break;
+      }
+      case "walkLunch": {
+        const isDone = (d.walks.lunch.minutes || 0) >= goal;
+        if (!isDone) {
+          d.walks.lunch.minutes = goal;
+          d.walks.lunch.sessions.push({
+            id: uid(), date: key, start: Date.now() - goal * 60000, end: Date.now(),
+            minutes: goal, complete: true,
+          });
+          toast("Lunch walk marked complete (30m) 🚶‍♀️");
+        } else {
+          d.walks.lunch.minutes = 0;
+          d.walks.lunch.sessions = [];
+          toast("Lunch walk unchecked");
+        }
+        break;
+      }
+      case "walkEvening": {
+        const isDone = (d.walks.evening.minutes || 0) >= goal;
+        if (!isDone) {
+          d.walks.evening.minutes = goal;
+          d.walks.evening.sessions.push({
+            id: uid(), date: key, start: Date.now() - goal * 60000, end: Date.now(),
+            minutes: goal, complete: true,
+          });
+          toast("Evening walk marked complete (30m) 🚶‍♀️");
+        } else {
+          d.walks.evening.minutes = 0;
+          d.walks.evening.sessions = [];
+          toast("Evening walk unchecked");
+        }
+        break;
+      }
+      case "water": {
+        const isDone = d.water >= state.profile.waterGlasses && d.water > 0;
+        if (!isDone) {
+          d.water = state.profile.waterGlasses;
+          toast("Daily water goal reached! 💧");
+        } else {
+          d.water = 0;
+          toast("Water goal unchecked");
+        }
+        break;
+      }
+      case "sleep": {
+        d.sleep.routine = !d.sleep.routine;
+        d.sleep.at = d.sleep.routine ? Date.now() : null;
+        toast(d.sleep.routine ? "Sleep routine marked! 🌙" : "Sleep routine unchecked");
+        break;
+      }
+    }
+
+    saveNow();
+    renderCurrent();
+    renderNav();
+  }
+
+  /* =========================================================
+     Meal Actions
+     ========================================================= */
+  function selectDay(dayKey) {
+    state.ui.mealsDay = dayKey;
+    save();
+    renderMeals();
+  }
+
+  function toggleMeal(slot) {
+    const key = state.ui.mealsDay || todayKey();
+    const d = getDay(key);
+    const next = !d.meals[slot].eaten;
+    d.meals[slot].eaten = next;
+    d.meals[slot].at = next ? Date.now() : null;
+    saveNow();
+    renderMeals();
+    renderNav();
+    toast(next ? "Meal marked as eaten ✓" : "Meal unchecked");
+  }
+
+  function addWater(delta) {
+    const d = getDay(todayKey());
+    d.water = Math.max(0, d.water + delta);
+    saveNow();
+    renderCurrent();
+    renderNav();
+    toast(`${delta > 0 ? "+1 Glass" : "-1 Glass"} logged (${d.water * 250} ml total)`);
+  }
+
+  /* =========================================================
+     Pedometer & Step Tracker Integration
+     ========================================================= */
+  let liveMotionActive = false;
+  let lastAccMagnitude = 0;
+
+  function openConnectTracker() {
+    openModal({
+      title: "Connect health tracker & pedometer",
+      sub: "Choose how to sync or record your daily steps",
+      body: `
+        <div class="stack" style="gap:10px">
+          <!-- Option 1: Live Phone Pedometer -->
+          <div class="card tint-sage" style="padding:14px;border:1.5px solid var(--sage-500)">
+            <div class="row" style="justify-content:space-between;align-items:flex-start">
+              <div>
+                <div style="font-weight:800;font-size:15px">${icon("phone", 16)} Phone Motion Sensor (Live Pedometer)</div>
+                <div class="hint" style="margin-top:2px">Reads acceleration peaks while you carry your phone.</div>
+              </div>
+              <button class="btn btn-sage btn-sm" id="btnEnableMotion">Enable Sensor</button>
+            </div>
+            <div id="motionStatus" class="hint" style="margin-top:8px;font-size:12px;color:var(--sage-600)">
+              ${liveMotionActive ? "Motion sensor is active and counting steps!" : "Tap to activate device accelerometer."}
+            </div>
+          </div>
+
+          <!-- Option 2: Apple Health / Health Connect Sync -->
+          <div class="card tint-lav" style="padding:14px">
+            <div class="row" style="justify-content:space-between;align-items:flex-start">
+              <div>
+                <div style="font-weight:800;font-size:15px">${icon("sparkle", 16)} Health App Sync (Apple Health / Google Fit)</div>
+                <div class="hint" style="margin-top:2px">One-tap simulation to pull verified steps from your health app.</div>
+              </div>
+              <button class="btn btn-lav btn-sm" id="btnSyncHealthApp">Sync Steps</button>
+            </div>
+          </div>
+
+          <!-- Option 3: Manual Entry -->
+          <div class="card" style="padding:14px">
+            <div class="row" style="justify-content:space-between;align-items:flex-start">
+              <div>
+                <div style="font-weight:800;font-size:15px">${icon("edit", 16)} Manual step count</div>
+                <div class="hint" style="margin-top:2px">Type in steps from your smartwatch or fitness band.</div>
+              </div>
+              <button class="btn btn-soft btn-sm" id="btnManualSteps">Enter Manually</button>
+            </div>
+          </div>
+
+          <!-- Clear Data -->
+          <div style="text-align:center;margin-top:4px">
+            <button class="btn btn-ghost btn-sm" id="btnClearSteps" style="font-size:12px;color:var(--plum-faint)">Clear step data (test disconnected state)</button>
+          </div>
+        </div>
+      `,
+      actions: [{ label: "Close", kind: "btn-primary" }],
+    });
+
+    // Wire up options
+    $("#btnEnableMotion").addEventListener("click", () => {
+      enableLiveMotionSensor();
+    });
+    $("#btnSyncHealthApp").addEventListener("click", () => {
+      const d = getDay(todayKey());
+      d.steps = 7450;
+      d.stepsSource = "device";
+      saveNow();
+      renderCurrent();
+      closeModal();
+      toast("7,450 steps synced from Health App! ✓");
+    });
+    $("#btnManualSteps").addEventListener("click", () => {
+      closeModal();
+      setTimeout(openManualSteps, 150);
+    });
+    $("#btnClearSteps").addEventListener("click", () => {
+      const d = getDay(todayKey());
+      d.steps = null;
+      d.stepsSource = null;
+      saveNow();
+      renderCurrent();
+      closeModal();
+      toast("Step sensor disconnected");
+    });
+  }
+
+  function enableLiveMotionSensor() {
+    if (typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function") {
+      DeviceMotionEvent.requestPermission().then((res) => {
+        if (res === "granted") startMotionListening();
+        else toast("Motion permission denied");
+      }).catch((e) => toast("Motion sensor not accessible here"));
+    } else if (window.DeviceMotionEvent) {
+      startMotionListening();
+    } else {
+      toast("Device motion is not supported in this browser environment. Use Manual Entry or Sync!");
+    }
+  }
+
+  function startMotionListening() {
+    liveMotionActive = true;
+    const d = getDay(todayKey());
+    if (d.steps == null) d.steps = 0;
+    d.stepsSource = "pedometer";
+    saveNow();
+
+    window.addEventListener("devicemotion", (e) => {
+      const acc = e.accelerationIncludingGravity || e.acceleration;
+      if (!acc) return;
+      const mag = Math.sqrt((acc.x || 0)**2 + (acc.y || 0)**2 + (acc.z || 0)**2);
+      const delta = mag - lastAccMagnitude;
+      lastAccMagnitude = mag;
+      if (delta > 3.2) { // Step peak threshold
+        const rec = getDay(todayKey());
+        rec.steps = (rec.steps || 0) + 1;
+        save();
+      }
+    });
+
+    const statusEl = $("#motionStatus");
+    if (statusEl) statusEl.textContent = "Sensor active! Shake or walk with device to count steps.";
+    toast("Live phone pedometer activated! 🚶‍♀️");
+  }
+
+  function openManualSteps() {
+    const d = getDay(todayKey());
+    openModal({
+      title: "Record steps manually",
+      sub: "Enter step count from your fitness band or pedometer",
+      body: `
+        <div class="field" style="margin-bottom:12px">
+          <label class="label" for="m-steps-input">Steps today</label>
+          <input class="input" id="m-steps-input" type="number" step="100" min="0" max="50000" value="${d.steps || 6000}">
+        </div>
+        <div class="label" style="margin-bottom:6px">Quick presets</div>
+        <div class="chip-group" style="margin-bottom:12px">
+          <button class="chip" data-preset="3000">3,000</button>
+          <button class="chip" data-preset="5000">5,000</button>
+          <button class="chip" data-preset="7500">7,500</button>
+          <button class="chip" data-preset="10000">10,000</button>
+        </div>
+        <div class="hint">Manual steps will be clearly identified as "Manual entry" on the dashboard.</div>
+      `,
+      actions: [
+        { label: "Cancel", kind: "btn-soft" },
+        {
+          label: "Save steps", kind: "btn-primary", onClick: () => {
+            const val = Number($("#m-steps-input").value);
+            if (val >= 0) {
+              d.steps = val;
+              d.stepsSource = "manual";
+              saveNow();
+              renderCurrent();
+              toast(`${val.toLocaleString()} steps recorded!`);
+            }
+          },
+        },
+      ],
+    });
+
+    $$(".modal-content .chip").forEach((chip) => {
+      chip.addEventListener("click", () => {
+        $("#m-steps-input").value = chip.getAttribute("data-preset");
+      });
+    });
+  }
+
+  /* =========================================================
+     Sleep Logger
+     ========================================================= */
+  function openLogSleep() {
+    const d = getDay(todayKey());
+    openModal({
+      title: "Log sleep & wind-down",
+      sub: "Enter bedtime and wake-up times to track sleep consistency",
+      body: `
+        <div class="field-row" style="margin-bottom:14px">
+          <div class="field">
+            <label class="label" for="m-bed">Bedtime</label>
+            <input class="input" id="m-bed" type="time" value="${d.sleep.bed || "23:00"}">
+          </div>
+          <div class="field">
+            <label class="label" for="m-wake">Wake-up time</label>
+            <input class="input" id="m-wake" type="time" value="${d.sleep.wake || "07:00"}">
+          </div>
+        </div>
+        <div class="switch-row">
+          <div class="switch-text">
+            <div class="switch-title">Sleep routine followed</div>
+            <div class="switch-desc">Dim lights, calm routine, no screens before bed</div>
+          </div>
+          <label class="switch"><input type="checkbox" id="m-routine" ${d.sleep.routine ? "checked" : ""}><span class="track"></span><span class="thumb"></span></label>
+        </div>
+        <div class="hint" style="margin-top:12px">Consistent sleep cycles help lower evening cortisol and balance luteinizing hormone (LH).</div>
+      `,
+      actions: [
+        { label: "Cancel", kind: "btn-soft" },
+        {
+          label: "Save sleep", kind: "btn-primary", onClick: () => {
+            d.sleep.bed = $("#m-bed").value;
+            d.sleep.wake = $("#m-wake").value;
+            d.sleep.routine = $("#m-routine").checked;
+            d.sleep.at = Date.now();
+            saveNow();
+            renderCurrent();
+            renderNav();
+            toast("Sleep times saved! 🌙");
+          },
+        },
+      ],
+    });
+  }
+
+  /* =========================================================
+     Quick Add Food & Diary
+     ========================================================= */
+  function openQuickLogMeal() {
+    const key = state.ui.mealsDay || todayKey();
+    const d = getDay(key);
+
+    openModal({
+      title: "Log food or snack",
+      sub: `${dayLabel(key)} · for items outside the meal plan`,
+      body: `
+        <div class="label" style="margin-bottom:6px">Select popular PCOS snacks or type below</div>
+        <div class="chip-group" style="margin-bottom:12px" id="snackChips">
+          ${SNACK_SUGGESTIONS.map((s) => `<button class="chip" data-sname="${escapeAttr(s.name)}" data-sport="${escapeAttr(s.portion)}">${s.name}</button>`).join("")}
+        </div>
+
+        <div class="field" style="margin-bottom:12px">
+          <label class="label" for="m-food">Food name</label>
+          <input class="input" id="m-food" placeholder="e.g. Roasted Makhana, Boiled Egg, Paneer Tikka">
+        </div>
+        <div class="field" style="margin-bottom:12px">
+          <label class="label" for="m-portion">Portion size</label>
+          <input class="input" id="m-portion" placeholder="e.g. 1 small bowl / 2 pieces / 150g">
+        </div>
+        <div class="field" style="margin-bottom:12px">
+          <label class="label" for="m-slot">Meal category</label>
+          <select class="input" id="m-slot">
+            <option value="snack">Evening snack</option>
+            <option value="extra">Extra snack / fruit</option>
+            <option value="breakfast">Breakfast</option>
+            <option value="lunch">Lunch</option>
+            <option value="dinner">Dinner</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="label" for="m-note">Notes (substitutions, hunger, satiety)</label>
+          <input class="input" id="m-note" placeholder="How did you feel after eating?">
+        </div>
+      `,
+      actions: [
+        { label: "Cancel", kind: "btn-soft" },
+        {
+          label: "Save to food diary", kind: "btn-blush", onClick: () => {
+            const name = $("#m-food").value.trim();
+            if (!name) { toast("Please enter a food name"); return true; }
+            d.foods.push({
+              id: uid(),
+              name,
+              portion: $("#m-portion").value.trim(),
+              slot: $("#m-slot").value,
+              note: $("#m-note").value.trim(),
+              at: Date.now(),
+            });
+            saveNow();
+            renderCurrent();
+            toast("Logged to daily food diary ✓");
+          },
+        },
+      ],
+    });
+
+    $$("#snackChips .chip").forEach((chip) => {
+      chip.addEventListener("click", () => {
+        $("#m-food").value = chip.getAttribute("data-sname");
+        $("#m-portion").value = chip.getAttribute("data-sport");
+        $$("#snackChips .chip").forEach((c) => c.classList.remove("active"));
+        chip.classList.add("active");
+      });
+    });
+  }
+
+  /* =========================================================
+     Homemade Laddu Recipe Calculator
+     ========================================================= */
+  function openLaddu() {
+    let rows = [
+      { name: "Whole-wheat atta", grams: 200 },
+      { name: "Desi ghee", grams: 80 },
+      { name: "Sesame seeds (til)", grams: 60 },
+      { name: "Gond (edible gum)", grams: 40 },
+      { name: "Jaggery (gud)", grams: 90 },
+      { name: "Almonds", grams: 50 },
+    ];
+
+    openModal({
+      title: "Homemade laddu batch calculator",
+      sub: "Atta, sesame (til), gond & dry-fruit recipe nutrition estimator",
+      body: `
+        <div class="field" style="margin-bottom:12px">
+          <label class="label" for="l-name">Batch name</label>
+          <input class="input" id="l-name" value="Nourishing Atta-Til-Gond Laddus">
+        </div>
+        <div class="label" style="margin-bottom:8px">Ingredients &amp; amounts (grams)</div>
+        <div id="l-rows" class="stack" style="gap:8px"></div>
+        <button class="btn btn-soft btn-sm" id="l-add" style="margin-top:10px">${icon("plus", 14)} Add ingredient</button>
+
+        <div class="field" style="margin-top:14px">
+          <label class="label" for="l-count">Total laddus made</label>
+          <input class="input" id="l-count" type="number" min="1" max="100" value="12">
+        </div>
+
+        <div class="card tint-sage" style="margin-top:14px;padding:14px" id="l-preview"></div>
+        <div class="hint" style="margin-top:8px"><strong>Important:</strong> Nutritional values are approximate estimates based on standard Indian raw ingredient values. Actual nutrition varies with cooking and portioning.</div>
+      `,
+      actions: [
+        { label: "Cancel", kind: "btn-soft" },
+        { label: "Save batch", kind: "btn-primary", onClick: () => saveBatch() },
+      ],
+    });
+
+    const rowsEl = () => $("#l-rows");
+    function rowHtml(r, i) {
+      return `<div class="row" data-lrow="${i}" style="gap:8px">
+        <select class="input" data-lname style="flex:1.4" aria-label="Ingredient ${i + 1}">
+          ${INGREDIENTS.map((ing) => `<option value="${escapeAttr(ing.name)}" ${ing.name === r.name ? "selected" : ""}>${ing.name}</option>`).join("")}
+        </select>
+        <input class="input" data-lgrams type="number" min="1" max="2000" value="${r.grams}" style="flex:0 0 90px" aria-label="Grams">
+        <button class="btn btn-ghost btn-icon btn-sm" data-lremove="${i}" aria-label="Remove">${icon("trash", 14)}</button>
+      </div>`;
+    }
+
+    function paint() {
+      rowsEl().innerHTML = rows.map(rowHtml).join("");
+      updatePreview();
+    }
+
+    function updatePreview() {
+      const batch = readBatch();
+      const per = perLaddu(batch);
+      $("#l-preview").innerHTML = `
+        <div class="eyebrow" style="margin-bottom:6px">Estimated nutrition per laddu</div>
+        <div class="stats-3">
+          <div><div class="stat-val" style="font-size:18px">${per.kcal}</div><div class="stat-lab">Calories (kcal)</div></div>
+          <div><div class="stat-val" style="font-size:18px">${per.protein}g</div><div class="stat-lab">Protein</div></div>
+          <div><div class="stat-val" style="font-size:18px">${per.fibre}g</div><div class="stat-lab">Fibre</div></div>
+        </div>
+        <div class="row" style="justify-content:space-between;margin-top:8px;font-size:12px;color:var(--plum-soft)">
+          <span>Healthy Fats: ~${per.fat}g</span>
+          <span>Iron: ~${per.iron}mg</span>
+          <span>Batch total: ~${per.totalKcal} kcal</span>
+        </div>
+      `;
+    }
+
+    function readBatch() {
+      const ingredients = $$("#l-rows [data-lrow]").map((row) => ({
+        name: row.querySelector("[data-lname]").value,
+        grams: Number(row.querySelector("[data-lgrams]").value) || 0,
+      })).filter((x) => x.grams > 0);
+      return {
+        id: "preview",
+        name: $("#l-name").value.trim() || "Laddu batch",
+        ingredients,
+        count: Math.max(1, Number($("#l-count").value) || 1),
+      };
+    }
+
+    function saveBatch() {
+      const batch = readBatch();
+      if (!batch.ingredients.length) { toast("Add at least one ingredient"); return true; }
+      state.ladduBatches.unshift({
+        id: uid(),
+        name: batch.name,
+        ingredients: batch.ingredients,
+        count: batch.count,
+        created: Date.now(),
+      });
+      saveNow();
+      renderCurrent();
+      toast("Laddu batch recipe saved! ✓");
+    }
+
+    const sheet = $(".sheet");
+    sheet.addEventListener("click", (e) => {
+      if (e.target.closest("#l-add")) {
+        rows.push({ name: INGREDIENTS[0].name, grams: 50 });
+        paint();
+      }
+      const rm = e.target.closest("[data-lremove]");
+      if (rm) {
+        const i = Number(rm.getAttribute("data-lremove"));
+        if (rows.length > 1) { rows.splice(i, 1); paint(); }
+      }
+    });
+
+    sheet.addEventListener("input", (e) => {
+      if (e.target.matches("[data-lgrams],[data-lname],#l-count,#l-name")) {
+        if (e.target.matches("[data-lgrams],[data-lname]")) {
+          rows = $$("#l-rows [data-lrow]").map((row) => ({
+            name: row.querySelector("[data-lname]").value,
+            grams: Number(row.querySelector("[data-lgrams]").value) || 0,
+          }));
+        }
+        updatePreview();
+      }
+    });
+
+    paint();
+  }
+
+  function logLaddu(batchId) {
+    const b = state.ladduBatches.find((x) => x.id === batchId);
+    if (!b) return;
+    const per = perLaddu(b);
+    const key = state.ui.mealsDay || todayKey();
+    getDay(key).foods.push({
+      id: uid(),
+      name: b.name + " (1 laddu)",
+      portion: `≈${per.kcal} kcal, ${per.protein}g protein, ${per.fibre}g fibre`,
+      note: "Homemade batch snack · approximate nutrition",
+      at: Date.now(),
+    });
+    saveNow();
+    renderCurrent();
+    toast("1 Laddu logged to food diary! 💗");
+  }
+
+  /* =========================================================
+     Weight & Data Management
+     ========================================================= */
+  function openLogWeight() {
+    openModal({
+      title: "Record weight (optional)",
+      sub: "Log only if helpful · habits matter more than scale numbers",
+      body: `
+        <div class="field" style="margin-bottom:12px">
+          <label class="label" for="w-kg">Weight (kg)</label>
+          <input class="input" id="w-kg" type="number" step="0.1" value="${state.profile.weightKg || 73.5}">
+        </div>
+        <div class="field">
+          <label class="label" for="w-date">Date</label>
+          <input class="input" id="w-date" type="date" value="${todayKey()}">
+        </div>
+        <div class="hint" style="margin-top:10px">Normal hydration and hormonal shifts cause weight to fluctuate daily. Focus on your steady routines!</div>
+      `,
+      actions: [
+        { label: "Cancel", kind: "btn-soft" },
+        {
+          label: "Save entry", kind: "btn-primary", onClick: () => {
+            const kg = Number($("#w-kg").value);
+            const date = $("#w-date").value;
+            if (kg > 20 && date) {
+              state.weights = state.weights.filter((w) => w.date !== date);
+              state.weights.push({ date, kg });
+              state.weights.sort((a, b) => a.date.localeCompare(b.date));
+              state.profile.weightKg = kg;
+              saveNow();
+              renderCurrent();
+              toast("Weight logged gently ✓");
+            }
+          },
+        },
+      ],
+    });
+  }
+
+  function exportData() {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
+    const dlAnchor = document.createElement("a");
+    dlAnchor.setAttribute("href", dataStr);
+    dlAnchor.setAttribute("download", `my-pcos-journey-${todayKey()}.json`);
+    document.body.appendChild(dlAnchor);
+    dlAnchor.click();
+    dlAnchor.remove();
+    toast("Data exported as JSON");
+  }
+
+  function resetData() {
+    openModal({
+      title: "Reset all application data?",
+      sub: "Clear all saved records and start fresh",
+      body: `
+        <div class="card tint-lav" style="padding:14px;color:var(--plum-soft)">
+          This will reset all your customized meals, walks, water and profile preferences, and restore the initial 7-day demo prototype state.
+        </div>
+      `,
+      actions: [
+        { label: "Cancel", kind: "btn-soft" },
+        {
+          label: "Yes, Reset All Data", kind: "btn-danger", onClick: () => {
+            Store.clear();
+            seedSampleData();
+            saveNow();
+            renderCurrent();
+            renderNav();
+            toast("All data reset to fresh demo week");
+          },
+        },
+      ],
+    });
+  }
+
+  /* =========================================================
+     Escaping Helpers
+     ========================================================= */
+  function escapeHtml(s) {
+    if (s == null) return "";
+    return String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+  function escapeAttr(s) {
+    return escapeHtml(s);
+  }
+
+  /* =========================================================
+     Global Delegated Event Listeners
+     ========================================================= */
+  document.addEventListener("click", (e) => {
+    // Navigation
+    const nav = e.target.closest("[data-nav]");
+    if (nav) { go(nav.getAttribute("data-nav")); return; }
+
+    const el = e.target.closest("[data-action]");
+    if (!el) return;
+    const act = el.getAttribute("data-action");
+
+    switch (act) {
+      case "toggle-habit": toggleHabit(el.getAttribute("data-habit")); break;
+      case "toggle-meal": toggleMeal(el.getAttribute("data-slot")); break;
+      case "select-day": selectDay(el.getAttribute("data-day")); break;
+      case "filter-meals": {
+        state.ui.mealsFilter = el.getAttribute("data-filter");
+        save(); renderMeals(); break;
+      }
+      case "water-plus": addWater(1); break;
+      case "water-minus": addWater(-1); break;
+      case "walk-start": startWalk(el.getAttribute("data-walk")); break;
+      case "walk-toggle": toggleWalk(); break;
+      case "walk-stop": stopWalk(); break;
+      case "walk-detail": walkDetail(el.getAttribute("data-walk")); break;
+      case "connect-tracker": openConnectTracker(); break;
+      case "manual-steps": openManualSteps(); break;
+      case "log-sleep": openLogSleep(); break;
+      case "quick-log-meal": openQuickLogMeal(); break;
+      case "open-laddu": openLaddu(); break;
+      case "log-laddu": logLaddu(el.getAttribute("data-id")); break;
+      case "delete-laddu": {
+        state.ladduBatches = state.ladduBatches.filter((b) => b.id !== el.getAttribute("data-id"));
+        saveNow(); renderMeals(); toast("Laddu batch removed");
+        break;
+      }
+      case "delete-food": {
+        const key = state.ui.mealsDay || todayKey();
+        const d = getDay(key);
+        d.foods = d.foods.filter((f) => f.id !== el.getAttribute("data-id"));
+        saveNow(); renderMeals(); toast("Food item removed");
+        break;
+      }
+      case "range": {
+        state.ui.progressRange = el.getAttribute("data-range");
+        save(); renderProgress(); break;
+      }
+      case "log-weight": openLogWeight(); break;
+      case "export-data": exportData(); break;
+      case "reset-data": resetData(); break;
+    }
+  });
+
+  document.addEventListener("change", (e) => {
+    const t = e.target;
+    if (t.matches("[data-habit='sleep']")) {
+      const d = getDay(todayKey());
+      d.sleep.routine = t.checked;
+      d.sleep.at = t.checked ? Date.now() : null;
+      saveNow(); renderCurrent(); renderNav();
+      toast(t.checked ? "Sleep routine marked!" : "Sleep routine unchecked");
+      return;
+    }
+    if (t.matches("[data-notif]")) {
+      state.profile.notifications[t.getAttribute("data-notif")] = t.checked;
+      saveNow();
+      return;
+    }
+    if (t.matches("[data-profile-toggle='hideWeight']")) {
+      state.profile.privacy.hideWeight = t.checked;
+      saveNow();
+      return;
+    }
+    if (t.matches("[data-profile]")) {
+      const key = t.getAttribute("data-profile");
+      if (["weightKg", "heightCm", "walkDailyGoal", "walkSessionGoal", "waterGlasses", "sleepGoal"].indexOf(key) !== -1) {
+        state.profile[key] = Number(t.value) || 0;
+      } else {
+        state.profile[key] = t.value;
+      }
+      saveNow();
+      return;
+    }
+  });
+
+  document.addEventListener("input", (e) => {
+    const t = e.target;
+    if (t.matches("[data-note]")) {
+      const key = state.ui.mealsDay || todayKey();
+      getDay(key).meals[t.getAttribute("data-note")].note = t.value;
+      save();
+    }
+  });
+
+  document.addEventListener("mousedown", (e) => {
+    if (e.target.matches("[data-modal-backdrop]")) closeModal();
+  });
+
+  // Device frame preview toggle on desktop
+  const btnDevice = $("#btnDeviceToggle");
+  if (btnDevice) {
+    btnDevice.addEventListener("click", () => {
+      document.body.classList.toggle("device-preview");
+      const isDev = document.body.classList.contains("device-preview");
+      $("#deviceToggleLabel").textContent = isDev ? "Responsive View" : "Mobile Frame";
+      toast(isDev ? "Switched to Mobile Phone Frame preview" : "Switched to Responsive Desktop layout");
+    });
+  }
+
+  /* =========================================================
+     Initialization
+     ========================================================= */
+  function init() {
+    loadState();
+    renderNav();
+    renderCurrent();
+    if (getActive()) startTimerLoop();
+  }
+
+  // Run on DOM ready
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
+
+</script>
+</body>
+</html>
