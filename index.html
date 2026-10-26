@@ -700,13 +700,14 @@
         extra: blankMeal(),
       },
       walks: {
-        lunch: { minutes: 0, sessions: [] },
-        evening: { minutes: 0, sessions: [] },
+        lunch: { minutes: 0, steps: null, sessions: [] },
+        evening: { minutes: 0, steps: null, sessions: [] },
       },
       water: 0,
       sleep: { bed: "23:00", wake: "07:00", routine: false, at: null },
       steps: null,
-      stepsSource: null, // "manual" | "device" | "pedometer" | "sample" | null
+      stepsSource: null, // "sensor_step_counter" | "health_connect" | "manual" | "sample" | null
+      stepsTimestamp: null,
       foods: [], // Extra custom food entries (+ Add Food)
       active: null,
     };
@@ -727,9 +728,9 @@
 
   let state = {
     profile: {
-      name: "Aarohi",
-      weightKg: 73.5,
-      heightCm: 162,
+      name: "",
+      weightKg: null,
+      heightCm: null,
       goalWeightKg: null,
       diet: "vegetarian",
       walkDailyGoal: 60,
@@ -739,6 +740,7 @@
       sleepGoal: 8,
       stepsGoal: 8000,
       units: "metric",
+      onboarded: false,
       notifications: { meals: true, water: true, walks: true, sleep: true, weekly: true },
       privacy: { share: false, hideWeight: false },
     },
@@ -806,24 +808,21 @@
           end: new Date(d.getFullYear(), d.getMonth(), d.getDate(), 21, 0).getTime(),
           minutes: eMins, complete: true, sample: true,
         }];
-        rec.steps = 7200 + Math.floor(rand() * 1200);
-        rec.stepsSource = "sample";
+        rec.steps = null;
+        rec.stepsSource = null;
+        rec.stepsTimestamp = null;
       } else if (isToday) {
-        rec.walks.lunch.minutes = 30;
-        rec.walks.lunch.sessions = [{
-          id: uid(), date: key,
-          start: new Date(d.getFullYear(), d.getMonth(), d.getDate(), 13, 40).getTime(),
-          end: new Date(d.getFullYear(), d.getMonth(), d.getDate(), 14, 10).getTime(),
-          minutes: 30, complete: true, sample: true,
-        }];
+        rec.walks.lunch.minutes = 0;
+        rec.walks.lunch.sessions = [];
         rec.walks.evening.minutes = 0;
         rec.walks.evening.sessions = [];
-        rec.water = 5;
+        rec.water = 0;
         rec.sleep.bed = "23:00";
         rec.sleep.wake = "07:00";
         rec.sleep.routine = false;
-        rec.steps = 5120;
-        rec.stepsSource = "sample";
+        rec.steps = null;
+        rec.stepsSource = null;
+        rec.stepsTimestamp = null;
       }
     }
     state.seededThrough = todayKey();
@@ -873,9 +872,12 @@
       state = saved;
       if (!state.ui) state.ui = { view: "home", mealsDay: todayKey(), mealsFilter: "all", progressRange: "week", deviceFrame: false };
       if (!state.weights) state.weights = [];
-      // Clean up legacy states if any
+      if (state.profile.onboarded === undefined) {
+        state.profile.onboarded = !!(state.profile.name && state.profile.name.trim().length > 0 && state.profile.name !== "Aarohi");
+      }
     } else {
       seedSampleData();
+      state.profile.onboarded = false;
       saveNow();
     }
   }
@@ -1242,7 +1244,7 @@
         <div class="card-head">
           <div>
             <div class="card-title">${type === "lunch" ? "Walk 1: After lunch" : "Walk 2: After dinner"}</div>
-            <div class="card-sub">${goal} min target · ${mins > 0 ? mins + " min logged" : "Supports steady post-meal glucose"}</div>
+            <div class="card-sub">${goal} min target · ${mins > 0 ? mins + " min logged" : "Supports steady post-meal glucose"}${w.steps != null && w.steps > 0 ? ` · <strong style="color:var(--sage-700)">${w.steps.toLocaleString()} steps</strong>` : ""}</div>
           </div>
           <span class="pill ${done ? "sage" : mins > 0 ? "blush" : "plain"}">${done ? "Completed ✓" : mins > 0 ? `${mins}m / ${goal}m` : "Ready"}</span>
         </div>
@@ -1275,9 +1277,17 @@
     const hPct = waterPct(key);
     const habPct = habitPct(key);
 
+    const stepSourceText = d.stepsSource === "sensor_step_counter" || d.stepsSource === "pedometer"
+      ? sourceBadge("Hardware Sensor", "sage")
+      : d.stepsSource === "health_connect"
+      ? sourceBadge("Health Connect", "lav")
+      : d.stepsSource === "manual"
+      ? sourceBadge("Manual entry", "blush")
+      : sourceBadge("Sample data", "plain");
+
     const stepMetric = steps != null
       ? `<div class="stat-val">${steps.toLocaleString()}<small> steps</small></div>
-         <div class="stat-note">${d.stepsSource === "manual" ? sourceBadge("Manual entry", "lav") : d.stepsSource === "pedometer" ? sourceBadge("Phone sensor", "sage") : sourceBadge("Sample data", "plain")}</div>`
+         <div class="stat-note">${stepSourceText}</div>`
       : `<div class="stat-val" style="font-size:13.5px;color:var(--plum-faint);font-weight:600">Not connected</div>
          <div class="stat-note"><button class="btn btn-ghost btn-sm" style="min-height:28px;padding:0 8px;font-size:11px" data-action="connect-tracker">Connect</button>
          <button class="btn btn-ghost btn-sm" style="min-height:28px;padding:0 8px;font-size:11px" data-action="manual-steps">Manual</button></div>`;
@@ -1677,7 +1687,7 @@
         <div class="card-head">
           <div>
             <div class="card-title">${meta.label}</div>
-            <div class="card-sub">${type === "lunch" ? "After lunch" : "After dinner"} · goal ${goal} minutes</div>
+            <div class="card-sub">${type === "lunch" ? "After lunch" : "After dinner"} · goal ${goal} minutes${w.steps != null && w.steps > 0 ? ` · <strong style="color:var(--sage-700)">${w.steps.toLocaleString()} steps</strong>` : ""}</div>
           </div>
           <span class="pill ${done ? "sage" : mins > 0 ? "blush" : "plain"}">${done ? "Complete ✓" : mins > 0 ? `${mins}m / ${goal}m` : "Not started"}</span>
         </div>
@@ -1729,7 +1739,7 @@
               <div class="stat" style="border:0;background:rgba(255,255,255,0.75)">
                 <div class="stat-lab">${icon("steps", 13)} Steps</div>
                 <div class="stat-val" style="font-size:16px">${d.steps != null ? d.steps.toLocaleString() : "—"}</div>
-                <div class="stat-note">${d.steps != null ? (d.stepsSource === "manual" ? "Manual" : d.stepsSource === "pedometer" ? "Sensor" : "Sample") : "Connect"}</div>
+                <div class="stat-note">${d.steps != null ? (d.stepsSource === "manual" ? "Manual" : d.stepsSource === "health_connect" ? "Health Connect" : (d.stepsSource === "sensor_step_counter" || d.stepsSource === "pedometer") ? "Sensor" : "Sample") : "Connect"}</div>
               </div>
               <div class="stat" style="border:0;background:rgba(255,255,255,0.75)">
                 <div class="stat-lab">${icon("flame", 13)} Calories</div>
@@ -1759,7 +1769,7 @@
             <div class="row" style="justify-content:space-between;margin-bottom:10px">
               <div>
                 <div class="stat-val">${d.steps.toLocaleString()}<small> steps</small></div>
-                <div class="stat-note">${d.stepsSource === "manual" ? sourceBadge("Manual entry", "lav") : d.stepsSource === "pedometer" ? sourceBadge("Phone pedometer", "sage") : sourceBadge("Sample data", "plain")}</div>
+                <div class="stat-note">${d.stepsSource === "manual" ? sourceBadge("Manual entry", "blush") : d.stepsSource === "health_connect" ? sourceBadge("Health Connect", "lav") : (d.stepsSource === "sensor_step_counter" || d.stepsSource === "pedometer") ? sourceBadge("Hardware Step Sensor", "sage") : sourceBadge("Sample data", "plain")}${d.stepsTimestamp ? ` · <span style="font-size:11px;color:var(--plum-faint)">Updated ${fmtTime(d.stepsTimestamp)}</span>` : ""}</div>
               </div>
               <button class="btn btn-ghost btn-sm" data-action="manual-steps">${icon("edit", 14)} Edit</button>
             </div>
@@ -1793,8 +1803,8 @@
                     <div class="row" style="gap:10px">
                       <span class="ach-icon" style="background:var(--sage-soft);color:var(--sage-600)">${icon("walk", 16)}</span>
                       <div>
-                        <div style="font-weight:700;font-size:14px">${WALK_TYPES[type].label} · ${s.minutes} min</div>
-                        <div class="hint" style="font-size:12px">${fmtTime(s.start)} – ${fmtTime(s.end)}${s.sample ? " · Sample" : ""}</div>
+                        <div style="font-weight:700;font-size:14px">${WALK_TYPES[type].label} · ${s.minutes} min${s.steps != null && s.steps > 0 ? ` · <span style="color:var(--sage-700)">${s.steps.toLocaleString()} steps</span>` : ""}</div>
+                        <div class="hint" style="font-size:12px">${fmtTime(s.start)} – ${fmtTime(s.end)}${s.source ? ` · ${s.source === "hardware_step_counter" ? "Sensor" : s.source}` : ""}${s.sample ? " · Sample" : ""}</div>
                       </div>
                     </div>
                     <span class="pill ${s.complete ? "sage" : "plain"}">${s.complete ? "Goal met" : "Partial (" + s.minutes + "m)"}</span>
@@ -2306,7 +2316,7 @@
   /* =========================================================
      Walking Actions
      ========================================================= */
-  function startWalk(type) {
+  async function startWalk(type) {
     const d = getDay(todayKey());
     if (d.active) {
       toast("A walk session is already in progress!");
@@ -2324,9 +2334,17 @@
     renderCurrent();
     renderNav();
     toast(WALK_TYPES[type].label + " timer started! 🚶‍♀️");
+
+    if (window.Capacitor?.Plugins?.StepCounter) {
+      try {
+        await window.Capacitor.Plugins.StepCounter.startSession({ sessionType: type });
+      } catch (err) {
+        console.warn("StepCounter startSession error:", err);
+      }
+    }
   }
 
-  function toggleWalk() {
+  async function toggleWalk() {
     const aw = getActive();
     if (!aw) return;
     if (aw.running) {
@@ -2335,11 +2353,17 @@
       aw.runStartedAt = null;
       stopTimerLoop();
       toast("Walk timer paused");
+      if (window.Capacitor?.Plugins?.StepCounter) {
+        try { await window.Capacitor.Plugins.StepCounter.pauseSession(); } catch (err) {}
+      }
     } else {
       aw.running = true;
       aw.runStartedAt = Date.now();
       startTimerLoop();
       toast("Walk timer resumed");
+      if (window.Capacitor?.Plugins?.StepCounter) {
+        try { await window.Capacitor.Plugins.StepCounter.resumeSession(); } catch (err) {}
+      }
     }
     saveNow();
     renderCurrent();
@@ -2380,24 +2404,45 @@
       ],
     });
 
-    function saveSession(tType, mins, totalMs) {
+    async function saveSession(tType, mins, totalMs) {
       const rec = getDay(todayKey());
       const end = Date.now();
+      let sessSteps = null;
+      let sessSource = null;
+
+      if (window.Capacitor?.Plugins?.StepCounter) {
+        try {
+          const res = await window.Capacitor.Plugins.StepCounter.stopSession();
+          if (res && res.sessionSteps != null) {
+            sessSteps = res.sessionSteps;
+            sessSource = res.source || "hardware_step_counter";
+          }
+        } catch (err) {
+          console.warn("StepCounter stopSession error:", err);
+        }
+      }
+
       rec.walks[tType].sessions.push({
         id: uid(),
         date: todayKey(),
         start: aw.startedAt,
         end,
         minutes: mins,
+        steps: sessSteps,
+        source: sessSource,
         complete: mins >= state.profile.walkSessionGoal,
       });
       rec.walks[tType].minutes = rec.walks[tType].sessions.reduce((a, s) => a + s.minutes, 0);
+      if (sessSteps != null) {
+        rec.walks[tType].steps = (rec.walks[tType].steps || 0) + sessSteps;
+      }
       rec.active = null;
       stopTimerLoop();
       saveNow();
       renderCurrent();
       renderNav();
-      toast(`Walk session confirmed! +${mins} min credited ✓`);
+      const stepMsg = sessSteps != null ? ` (${sessSteps.toLocaleString()} steps)` : "";
+      toast(`Walk session confirmed! +${mins} min${stepMsg} credited ✓`);
     }
 
     function confirmDiscard() {
@@ -2414,10 +2459,13 @@
           actions: [
             { label: "Keep walking", kind: "btn-sage", onClick: () => true },
             {
-              label: "Confirm discard", kind: "btn-danger", onClick: () => {
+              label: "Confirm discard", kind: "btn-danger", onClick: async () => {
                 const rec = getDay(todayKey());
                 rec.active = null;
                 stopTimerLoop();
+                if (window.Capacitor?.Plugins?.StepCounter) {
+                  try { await window.Capacitor.Plugins.StepCounter.stopSession(); } catch (e) {}
+                }
                 saveNow();
                 renderCurrent();
                 renderNav();
@@ -2661,34 +2709,80 @@
   let liveMotionActive = false;
   let lastAccMagnitude = 0;
 
-  function openConnectTracker() {
+  async function openConnectTracker() {
+    let scStatus = "Checking device sensor...";
+    let hcStatus = "Checking Health Connect...";
+    let hasNativeStep = false;
+    let hasNativeHC = false;
+    let stepPermGranted = false;
+    let hcPermGranted = false;
+
+    if (window.Capacitor?.Plugins?.StepCounter) {
+      try {
+        const avail = await window.Capacitor.Plugins.StepCounter.checkAvailability();
+        hasNativeStep = avail.available;
+        stepPermGranted = avail.hasPermission;
+        scStatus = avail.message || (avail.available ? "Hardware step sensor is available." : "Hardware sensor not available.");
+      } catch (e) {
+        scStatus = "Step sensor status: " + (e.message || "Ready");
+      }
+    } else {
+      scStatus = "Native hardware sensor is active when installed on Android. In browser preview, use device motion or manual entry.";
+    }
+
+    if (window.Capacitor?.Plugins?.HealthConnect) {
+      try {
+        const hc = await window.Capacitor.Plugins.HealthConnect.checkAvailability();
+        hasNativeHC = hc.available;
+        if (hc.available) {
+          const perm = await window.Capacitor.Plugins.HealthConnect.checkHealthPermissions();
+          hcPermGranted = perm.hasPermission;
+          hcStatus = hcPermGranted
+            ? "Health Connect connected and read permission granted ✓"
+            : "Health Connect available. Tap 'Connect' to grant permission to read daily steps.";
+        } else {
+          hcStatus = hc.message || "Health Connect not available on this device.";
+        }
+      } catch (e) {
+        hcStatus = "Health Connect: " + (e.message || "Active on Android");
+      }
+    } else {
+      hcStatus = "Health Connect platform integration is available on supported Android devices.";
+    }
+
     openModal({
       title: "Connect health tracker & pedometer",
-      sub: "Choose how to sync or record your daily steps",
+      sub: "Read verified daily steps from Android Sensor or Health Connect",
       body: `
         <div class="stack" style="gap:10px">
-          <!-- Option 1: Live Phone Pedometer -->
+          <!-- Option 1: Native Step Counter (Sensor.TYPE_STEP_COUNTER) -->
           <div class="card tint-sage" style="padding:14px;border:1.5px solid var(--sage-500)">
             <div class="row" style="justify-content:space-between;align-items:flex-start">
               <div>
-                <div style="font-weight:800;font-size:15px">${icon("phone", 16)} Phone Motion Sensor (Live Pedometer)</div>
-                <div class="hint" style="margin-top:2px">Reads acceleration peaks while you carry your phone.</div>
+                <div style="font-weight:800;font-size:15px">${icon("walk", 16)} Android Hardware Step Sensor</div>
+                <div class="hint" style="margin-top:2px">Uses Sensor.TYPE_STEP_COUNTER with runtime ACTIVITY_RECOGNITION.</div>
               </div>
-              <button class="btn btn-sage btn-sm" id="btnEnableMotion">Enable Sensor</button>
+              <button class="btn btn-sage btn-sm" id="btnSyncStepSensor">${stepPermGranted ? "Read Steps" : "Enable Sensor"}</button>
             </div>
-            <div id="motionStatus" class="hint" style="margin-top:8px;font-size:12px;color:var(--sage-600)">
-              ${liveMotionActive ? "Motion sensor is active and counting steps!" : "Tap to activate device accelerometer."}
+            <div id="stepSensorStatus" class="hint" style="margin-top:8px;font-size:12px;color:var(--sage-700)">
+              ${scStatus}
             </div>
           </div>
 
-          <!-- Option 2: Apple Health / Health Connect Sync -->
-          <div class="card tint-lav" style="padding:14px">
+          <!-- Option 2: Health Connect Integration -->
+          <div class="card tint-lav" style="padding:14px;border:1.5px solid var(--lavender-400)">
             <div class="row" style="justify-content:space-between;align-items:flex-start">
               <div>
-                <div style="font-weight:800;font-size:15px">${icon("sparkle", 16)} Health App Sync (Apple Health / Google Fit)</div>
-                <div class="hint" style="margin-top:2px">One-tap simulation to pull verified steps from your health app.</div>
+                <div style="font-weight:800;font-size:15px">${icon("sparkle", 16)} Google Health Connect</div>
+                <div class="hint" style="margin-top:2px">Aggregated daily step counts from Google Health platform.</div>
               </div>
-              <button class="btn btn-lav btn-sm" id="btnSyncHealthApp">Sync Steps</button>
+              <div class="row" style="gap:6px">
+                <button class="btn btn-lav btn-sm" id="btnSyncHealthConnect">${hcPermGranted ? "Sync Steps" : "Connect"}</button>
+                <button class="btn btn-soft btn-sm" id="btnSettingsHC" title="Open Health Connect Settings">Settings</button>
+              </div>
+            </div>
+            <div id="hcStatus" class="hint" style="margin-top:8px;font-size:12px;color:var(--plum-dark)">
+              ${hcStatus}
             </div>
           </div>
 
@@ -2697,46 +2791,261 @@
             <div class="row" style="justify-content:space-between;align-items:flex-start">
               <div>
                 <div style="font-weight:800;font-size:15px">${icon("edit", 16)} Manual step count</div>
-                <div class="hint" style="margin-top:2px">Type in steps from your smartwatch or fitness band.</div>
+                <div class="hint" style="margin-top:2px">Record steps directly from your smartwatch or fitness band.</div>
               </div>
               <button class="btn btn-soft btn-sm" id="btnManualSteps">Enter Manually</button>
             </div>
           </div>
 
-          <!-- Clear Data -->
+          <!-- Clear / Disconnect -->
           <div style="text-align:center;margin-top:4px">
-            <button class="btn btn-ghost btn-sm" id="btnClearSteps" style="font-size:12px;color:var(--plum-faint)">Clear step data (test disconnected state)</button>
+            <button class="btn btn-ghost btn-sm" id="btnClearSteps" style="font-size:12px;color:var(--plum-faint)">Clear / Disconnect step data</button>
           </div>
         </div>
       `,
       actions: [{ label: "Close", kind: "btn-primary" }],
     });
 
-    $("#btnEnableMotion").addEventListener("click", () => {
-      enableLiveMotionSensor();
+    $("#btnSyncStepSensor")?.addEventListener("click", async () => {
+      if (window.Capacitor?.Plugins?.StepCounter) {
+        try {
+          if (!stepPermGranted) {
+            const req = await window.Capacitor.Plugins.StepCounter.requestStepPermission();
+            if (!req.granted) {
+              toast("Activity recognition permission was denied.");
+              return;
+            }
+          }
+          const res = await window.Capacitor.Plugins.StepCounter.getDailySteps();
+          if (res && res.steps != null) {
+            const d = getDay(todayKey());
+            d.steps = res.steps;
+            d.stepsSource = "sensor_step_counter";
+            d.stepsTimestamp = res.timestamp || Date.now();
+            saveNow();
+            renderCurrent();
+            closeModal();
+            toast(`${res.steps.toLocaleString()} steps read from hardware sensor! ✓`);
+          } else {
+            toast(res?.message || "No steps recorded on hardware sensor yet today.");
+          }
+        } catch (e) {
+          toast("Step sensor error: " + (e.message || "Failed"));
+        }
+      } else {
+        enableLiveMotionSensor();
+      }
     });
-    $("#btnSyncHealthApp").addEventListener("click", () => {
-      const d = getDay(todayKey());
-      d.steps = 7450;
-      d.stepsSource = "device";
-      saveNow();
-      renderCurrent();
-      closeModal();
-      toast("7,450 steps synced from Health App! ✓");
+
+    $("#btnSyncHealthConnect")?.addEventListener("click", async () => {
+      if (window.Capacitor?.Plugins?.HealthConnect) {
+        try {
+          if (!hcPermGranted) {
+            await window.Capacitor.Plugins.HealthConnect.requestHealthPermissions();
+          }
+          const res = await window.Capacitor.Plugins.HealthConnect.getDailySteps({ date: todayKey() });
+          if (res && res.steps != null) {
+            const d = getDay(todayKey());
+            d.steps = res.steps;
+            d.stepsSource = "health_connect";
+            d.stepsTimestamp = res.timestamp || Date.now();
+            saveNow();
+            renderCurrent();
+            closeModal();
+            toast(`${res.steps.toLocaleString()} steps synced from Health Connect! ✓`);
+          } else {
+            toast(res?.message || "0 steps recorded in Health Connect for today.");
+          }
+        } catch (e) {
+          toast("Health Connect: " + (e.message || "Check permissions"));
+        }
+      } else {
+        toast("Health Connect is available when running in the Android native app.");
+      }
     });
-    $("#btnManualSteps").addEventListener("click", () => {
+
+    $("#btnSettingsHC")?.addEventListener("click", async () => {
+      if (window.Capacitor?.Plugins?.HealthConnect) {
+        await window.Capacitor.Plugins.HealthConnect.openHealthConnectSettings();
+      } else {
+        toast("Settings available in the Android native app.");
+      }
+    });
+
+    $("#btnManualSteps")?.addEventListener("click", () => {
       closeModal();
       setTimeout(openManualSteps, 150);
     });
-    $("#btnClearSteps").addEventListener("click", () => {
+
+    $("#btnClearSteps")?.addEventListener("click", () => {
       const d = getDay(todayKey());
       d.steps = null;
       d.stepsSource = null;
+      d.stepsTimestamp = null;
       saveNow();
       renderCurrent();
       closeModal();
       toast("Step sensor disconnected");
     });
+  }
+
+  function openFirstTimeProfileSetup() {
+    openModal({
+      title: "Welcome to My PCOS Journey 💗",
+      sub: "First-time profile setup · Personalize your wellness tracker",
+      body: `
+        <div class="stack" style="gap:12px">
+          <div class="card tint-blush" style="padding:14px;border:1px solid var(--blush-300)">
+            <div style="font-weight:700;font-size:14px;color:var(--plum-dark)">Welcome to your personal PCOS wellness space!</div>
+            <div class="hint" style="margin-top:4px">
+              Gentle, consistent meals, daily walking, hydration, and sleep help manage PCOS and balance hormones.
+            </div>
+          </div>
+
+          <div class="field">
+            <label class="label" for="setup-name">Your Name</label>
+            <input class="input" id="setup-name" type="text" placeholder="e.g. Meenu" value="${escapeAttr(state.profile.name || "")}">
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label class="label" for="setup-height">Height (cm) <small style="color:var(--plum-faint)">(optional)</small></label>
+              <input class="input" id="setup-height" type="number" step="1" placeholder="e.g. 162" value="${state.profile.heightCm || ""}">
+            </div>
+            <div class="field">
+              <label class="label" for="setup-weight">Weight (kg) <small style="color:var(--plum-faint)">(optional)</small></label>
+              <input class="input" id="setup-weight" type="number" step="0.1" placeholder="e.g. 68.0" value="${state.profile.weightKg || ""}">
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label class="label" for="setup-walk-goal">Daily Walking Goal (min)</label>
+              <input class="input" id="setup-walk-goal" type="number" step="5" min="10" max="180" value="${state.profile.walkDailyGoal || 60}">
+            </div>
+            <div class="field">
+              <label class="label" for="setup-steps-goal">Daily Steps Goal</label>
+              <input class="input" id="setup-steps-goal" type="number" step="500" min="1000" max="30000" value="${state.profile.stepsGoal || 8000}">
+            </div>
+          </div>
+
+          <!-- Local storage privacy notice -->
+          <div class="card tint-lav" style="padding:12px;border:1px solid var(--lavender-300)">
+            <div style="display:flex;gap:8px;align-items:flex-start">
+              <span style="font-size:18px">🔒</span>
+              <div style="font-size:12px;line-height:1.5;color:var(--plum-soft)">
+                <strong>Local &amp; Private Storage:</strong> In this version, all your personal information, meal diary entries, and step measurements are stored exclusively on this local device. Your data will <em>not</em> automatically synchronize across devices or upload to external cloud servers.
+              </div>
+            </div>
+          </div>
+        </div>
+      `,
+      actions: [
+        {
+          label: "Save & Start My Journey ✨",
+          kind: "btn-sage",
+          onClick: () => {
+            const nameInput = $("#setup-name").value.trim();
+            const heightInput = parseFloat($("#setup-height").value);
+            const weightInput = parseFloat($("#setup-weight").value);
+            const walkInput = parseInt($("#setup-walk-goal").value, 10);
+            const stepsInput = parseInt($("#setup-steps-goal").value, 10);
+
+            state.profile.name = nameInput || "My Journey";
+            state.profile.heightCm = isNaN(heightInput) ? null : heightInput;
+            state.profile.weightKg = isNaN(weightInput) ? null : weightInput;
+            if (!isNaN(walkInput) && walkInput > 0) state.profile.walkDailyGoal = walkInput;
+            if (!isNaN(stepsInput) && stepsInput > 0) state.profile.stepsGoal = stepsInput;
+            state.profile.onboarded = true;
+
+            saveNow();
+            renderNav();
+            renderCurrent();
+            toast(`Welcome, ${state.profile.name}! Your wellness profile is saved 💗`);
+            return true;
+          },
+        },
+      ],
+    });
+  }
+
+  async function initNativePlugins() {
+    if (!window.Capacitor?.Plugins) return;
+    const { StepCounter, HealthConnect } = window.Capacitor.Plugins;
+
+    if (StepCounter) {
+      try {
+        const avail = await StepCounter.checkAvailability();
+        state.device = state.device || {};
+        state.device.stepCounter = avail;
+
+        if (avail.available && avail.hasPermission) {
+          const res = await StepCounter.getDailySteps();
+          if (res && res.steps != null) {
+            const today = getDay(todayKey());
+            today.steps = res.steps;
+            today.stepsSource = "sensor_step_counter";
+            today.stepsTimestamp = res.timestamp;
+            save();
+          }
+        }
+
+        // Recover active walk session if app was killed and restarted during a walk
+        const sess = await StepCounter.getSessionStatus();
+        if (sess) {
+          const today = getDay(todayKey());
+          if (sess.todayLunchSteps != null && sess.todayLunchSteps >= 0) {
+            today.walks.lunch.steps = sess.todayLunchSteps;
+          }
+          if (sess.todayEveningSteps != null && sess.todayEveningSteps >= 0) {
+            today.walks.evening.steps = sess.todayEveningSteps;
+          }
+          if (sess.isActive && sess.sessionType) {
+            if (!today.active) {
+              today.active = {
+                type: sess.sessionType,
+                startedAt: sess.startTime || Date.now(),
+                accumulatedMs: sess.startTime ? Math.max(0, Date.now() - sess.startTime) : 0,
+                running: !sess.isPaused,
+                runStartedAt: !sess.isPaused ? Date.now() : null,
+              };
+              if (today.active.running) startTimerLoop();
+              renderCurrent();
+            }
+          }
+        }
+      } catch (err) {
+        console.warn("StepCounter native init error:", err);
+      }
+    }
+
+    if (HealthConnect) {
+      try {
+        const hcAvail = await HealthConnect.checkAvailability();
+        state.device = state.device || {};
+        state.device.healthConnect = hcAvail;
+
+        if (hcAvail.available) {
+          const perm = await HealthConnect.checkHealthPermissions();
+          state.device.healthConnect.hasPermission = perm.hasPermission;
+          if (perm.hasPermission) {
+            const hcSteps = await HealthConnect.getDailySteps({ date: todayKey() });
+            if (hcSteps && hcSteps.steps != null && hcSteps.steps > 0) {
+              const today = getDay(todayKey());
+              if (today.steps == null || today.stepsSource === "sample") {
+                today.steps = hcSteps.steps;
+                today.stepsSource = "health_connect";
+                today.stepsTimestamp = hcSteps.timestamp;
+                save();
+                renderCurrent();
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.warn("HealthConnect native init error:", err);
+      }
+    }
   }
 
   function enableLiveMotionSensor() {
@@ -3128,11 +3437,15 @@
   /* =========================================================
      Initialization
      ========================================================= */
-  function init() {
+  async function init() {
     loadState();
     renderNav();
     renderCurrent();
     if (getActive()) startTimerLoop();
+    await initNativePlugins();
+    if (!state.profile.onboarded) {
+      setTimeout(openFirstTimeProfileSetup, 350);
+    }
   }
 
   // Run on DOM ready

@@ -1,1 +1,10 @@
 .commandcode/
+.tools/
+node_modules/
+backup/
+.gradle/
+build/
+android/app/build/
+android/.gradle/
+android/build/
+local.properties

@@ -1,0 +1,8 @@
+{
+  "appId": "com.mypcosjourney.app",
+  "appName": "My PCOS Journey",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
+}
