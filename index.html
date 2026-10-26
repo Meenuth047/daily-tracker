@@ -254,33 +254,26 @@
   .filter-btn { background: none; border: 0; padding: 5px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; color: var(--plum-soft); transition: all 0.15s ease; }
   .filter-btn[aria-pressed="true"] { background: #fff; color: var(--plum); font-weight: 700; box-shadow: 0 1px 4px rgba(61,43,68,0.08); }
 
+  /* Meal card design: simplified, clean, personal food diary */
   .meal {
     background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md);
-    padding: 16px; transition: all 0.18s ease;
+    padding: 16px; transition: all 0.18s ease; display: flex; flex-direction: column; gap: 10px;
   }
-  .meal.done { background: var(--sage-soft); border-color: rgba(127,168,118,0.25); }
-  .meal-top { display: flex; align-items: flex-start; gap: 14px; }
-  .meal-eaten-btn {
-    display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px;
-    border: 1.5px solid var(--line-strong); background: #fff; font-size: 12px; font-weight: 700;
-    color: var(--plum-soft); cursor: pointer; transition: all 0.15s ease; user-select: none;
+  .meal.done { background: var(--sage-soft); border-color: rgba(127,168,118,0.3); }
+  .meal-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .meal-cat-title { font-size: 14px; font-weight: 800; color: var(--plum); letter-spacing: -0.01em; text-transform: uppercase; }
+  .meal-time-badge { font-size: 11.5px; font-weight: 600; color: var(--plum-faint); }
+  .meal-body { display: flex; flex-direction: column; gap: 4px; }
+  .meal-food-entry { font-size: 16px; font-weight: 700; color: var(--plum); letter-spacing: -0.01em; }
+  .meal-portion-text { font-size: 13px; color: var(--plum-soft); }
+  .meal-notes-text { font-size: 12.5px; color: var(--plum-soft); background: rgba(255,255,255,0.7); padding: 6px 10px; border-radius: var(--r-xs); border: 1px solid var(--line); margin-top: 4px; }
+  .meal-actions-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+
+  /* Separate suggestion box */
+  .card-suggestion {
+    padding: 10px 12px; border-radius: var(--r-sm); background: var(--surface-2);
+    border: 1px dashed rgba(61,43,68,0.18); font-size: 12px; line-height: 1.45;
   }
-  .meal-eaten-btn.checked {
-    background: var(--sage-500); border-color: var(--sage-500); color: #1C3817;
-    box-shadow: 0 2px 8px rgba(127,168,118,0.3);
-  }
-  .meal-eaten-btn svg { width: 14px; height: 14px; stroke-width: 2.5; }
-  .meal-name { font-size: 15.5px; font-weight: 700; letter-spacing: -0.01em; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .meal.done .meal-name span.txt { text-decoration: line-through; color: var(--plum-soft); }
-  .meal-time { font-size: 11px; font-weight: 700; color: var(--plum-faint); text-transform: uppercase; letter-spacing: 0.04em; }
-  .meal-portion { font-size: 12px; color: var(--plum-soft); font-weight: 600; }
-  .meal-desc { font-size: 13px; color: var(--plum-soft); margin-top: 6px; line-height: 1.45; }
-  .meal-foot { display: flex; align-items: center; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
-  .meal-note {
-    flex: 1; min-width: 160px; font-size: 12.5px; padding: 7px 11px; border-radius: var(--r-xs);
-    border: 1px solid var(--line); background: rgba(255,255,255,0.7); color: var(--plum);
-  }
-  .meal-note:focus { background: #fff; border-color: var(--lavender-500); outline: none; }
 
   /* Walking tracker timer */
   .timer { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-weight: 800; letter-spacing: -0.02em; }
@@ -546,7 +539,7 @@
      Storage (localStorage with memory fallback)
      ========================================================= */
   const Store = (function () {
-    const KEY = "pcosJourney:v2";
+    const KEY = "pcosJourney:v3";
     let memory = null;
     let available = false;
     try {
@@ -586,19 +579,20 @@
   })();
 
   /* =========================================================
-     Static plan data — Vegetarian, PCOS-friendly, Indian
+     Static plan data — Vegetarian, PCOS-friendly, Indian Ideas
      ========================================================= */
   const MEAL_SLOTS = [
     { key: "breakfast", label: "Breakfast", window: "8:00 – 9:00 am" },
     { key: "lunch", label: "Lunch", window: "1:00 – 2:00 pm" },
     { key: "snack", label: "Evening snack", window: "5:00 – 6:00 pm" },
     { key: "dinner", label: "Dinner", window: "8:00 – 8:45 pm" },
-    { key: "extra", label: "Extra snack / fruit", window: "Optional" },
+    { key: "extra", label: "Additional snack", window: "Optional" },
   ];
 
   const DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
   const DAY_SHORT = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
+  // Optional PCOS-friendly meal suggestions (separate from user's diary entries)
   const PLAN = [
     {
       breakfast: { name: "Moong dal chillas", portion: "2 chillas + 1 tbsp mint chutney", desc: "Yellow moong dal batter with grated carrot, spinach and cumin, cooked on a lightly greased tawa. High protein, gentle on digestion." },
@@ -610,7 +604,7 @@
     {
       breakfast: { name: "Vegetable rolled oats with milk", portion: "1 bowl savory oats + 1 cup warm toned milk", desc: "Rolled oats simmered with diced peas, carrots, turmeric and mustard seeds. Beta-glucan fibre supports insulin sensitivity." },
       lunch: { name: "Rajma, steamed rice & curd", portion: "1 katori rajma + 1 katori rice + cucumber slices", desc: "Slow-cooked kidney beans with cumin and ginger, steamed rice with a tsp of ghee, and cooling curd. High in plant protein and iron." },
-      snack: { name: "Homemade atta-sesame laddu", portion: "1 small laddu + warm water", desc: "Whole-wheat flour roasted in ghee with white sesame seeds (til), gond, and crushed almonds. Rich in zinc, calcium and healthy fats." },
+      snack: { name: "Roasted makhana & walnuts", portion: "1 bowl makhana + 3 walnuts", desc: "Crisp foxnuts roasted in 1/2 tsp ghee with rock salt paired with omega-3 rich walnuts for steady evening satiety." },
       dinner: { name: "Bajra roti with lauki & paneer", portion: "1 bajra roti + 1 katori lauki + 50g sautéed paneer", desc: "Millet roti paired with bottle-gourd sabzi and lightly seared paneer cubes. Low glycemic index and calming for evening rest." },
       extra: { name: "Fresh sweet orange / citrus", portion: "1 whole fruit", desc: "Citrus bioflavonoids and vitamin C enhance non-heme iron absorption." },
     },
@@ -624,7 +618,7 @@
     {
       breakfast: { name: "Vegetable daliya with crushed almonds", portion: "1 bowl broken-wheat porridge + 6 almonds", desc: "Slow-cooked broken wheat with finely chopped beans, carrots and mild spices. Topped with soaked almonds." },
       lunch: { name: "Rajma, phulka & kachumber salad", portion: "1 katori slow-cooked rajma + 2 rotis + crunchy salad", desc: "Wholesome legume protein combined with whole wheat and raw salad dressed with lemon and pink salt." },
-      snack: { name: "Roasted chana & homemade laddu", portion: "1 laddu + small handful chana", desc: "Sustained afternoon fuel from complex pulses and nourishing seeds." },
+      snack: { name: "Roasted chana & almonds", portion: "1 fistful chana + 5 almonds", desc: "Dry-roasted Bengal gram and raw almonds for high-fibre protein and steady glucose." },
       dinner: { name: "Paneer bhurji with roti & dal", portion: "100g paneer bhurji + 1 phulka + 1/2 katori moong dal", desc: "Crumbled fresh paneer sautéed with bell peppers, tomatoes and coriander. Satiating protein for peaceful overnight repair." },
       extra: { name: "Tender coconut water or buttermilk", portion: "1 glass", desc: "Natural electrolytes and minerals without refined sugars." },
     },
@@ -638,7 +632,7 @@
     {
       breakfast: { name: "Ragi dosa with tomato chutney", portion: "2 crisp finger-millet dosas + tomato-garlic chutney", desc: "Calcium-rich ragi flour dosa with savory tomato chutney. Rich in essential minerals." },
       lunch: { name: "Chole, steamed jeera rice & green salad", portion: "1 katori chole + 1 katori rice + cucumber & beetroot", desc: "Spiced chickpeas with cumin rice and a raw vegetable plate. Wholesome weekend comfort with zero guilt." },
-      snack: { name: "Homemade atta-sesame-gond laddu", portion: "1 laddu + warm herbal tea", desc: "Nourishing postpartum and PCOS traditional recipe: gond (edible gum), til and nuts." },
+      snack: { name: "Spiced buttermilk & roasted seeds", portion: "1 glass chaas + 1 tbsp sunflower & pumpkin seeds", desc: "Cooling digestive chaas paired with zinc-rich seeds to support hormone synthesis." },
       dinner: { name: "Tofu & vegetable curry with roti", portion: "1 katori tofu in tomato gravy + 2 soft phulkas", desc: "High-protein soy cubes simmered in onion-tomato masala with bell peppers. Clean, light finish." },
       extra: { name: "Fresh sweet lime (mosambi) or pear", portion: "1 whole fruit", desc: "Juicy hydration with natural vitamin C and potassium." },
     },
@@ -651,24 +645,12 @@
     },
   ];
 
-  /* Ingredients for Laddu Batch Calculator */
-  const INGREDIENTS = [
-    { name: "Whole-wheat atta", kcal: 341, protein: 12, carbs: 71, fat: 2.5, fibre: 11, iron: 3.6 },
-    { name: "Desi ghee", kcal: 900, protein: 0, carbs: 0, fat: 100, fibre: 0, iron: 0 },
-    { name: "Sesame seeds (til)", kcal: 573, protein: 17, carbs: 23, fat: 50, fibre: 12, iron: 14.6 },
-    { name: "Gond (edible gum)", kcal: 350, protein: 2, carbs: 80, fat: 1, fibre: 2, iron: 0.5 },
-    { name: "Jaggery (gud)", kcal: 383, protein: 0.4, carbs: 98, fat: 0.1, fibre: 0, iron: 3.0 },
-    { name: "Dates (khajoor)", kcal: 282, protein: 2.5, carbs: 75, fat: 0.4, fibre: 8, iron: 1.0 },
-    { name: "Almonds", kcal: 579, protein: 21, carbs: 22, fat: 50, fibre: 12.5, iron: 3.7 },
-    { name: "Walnuts", kcal: 654, protein: 15, carbs: 14, fat: 65, fibre: 7, iron: 2.9 },
-    { name: "Cashews", kcal: 553, protein: 18, carbs: 30, fat: 44, fibre: 3, iron: 6.7 },
-    { name: "Raisins (kishmish)", kcal: 299, protein: 3, carbs: 79, fat: 0.5, fibre: 4, iron: 1.9 },
-    { name: "Poppy seeds (khus khus)", kcal: 525, protein: 18, carbs: 28, fat: 42, fibre: 20, iron: 9.8 },
-    { name: "Dry fruit mix", kcal: 560, protein: 18, carbs: 26, fat: 48, fibre: 8, iron: 4.0 },
-  ];
-
-  /* Snacks suggestions for Quick Log */
+  /* Generic snacks & quick food suggestions */
   const SNACK_SUGGESTIONS = [
+    { name: "3 Rotis and Bhindi Sabzi", portion: "3 medium rotis, 1 bowl bhindi" },
+    { name: "1 Roti with Bhindi and 1 cup Milk", portion: "1 phulka, 1 katori sabzi, 200 ml milk" },
+    { name: "Rice, Dal and Mixed Vegetables", portion: "1 bowl steamed rice, 1 bowl dal, salad" },
+    { name: "1 Fruit and Roasted Chana", portion: "1 apple / guava + 1 fistful chana" },
     { name: "Roasted Makhana (Foxnuts)", portion: "1 bowl (30g) in 1/2 tsp ghee" },
     { name: "Masala Chaas / Spiced Buttermilk", portion: "1 glass (250 ml) with jeera" },
     { name: "Sprouted Moong Chaat with Lemon", portion: "1 small bowl (100g)" },
@@ -676,8 +658,6 @@
     { name: "Paneer Cubes with Chaat Masala", portion: "50g pan-seared paneer" },
     { name: "Handful of Walnuts & Almonds", portion: "4-5 almonds + 2 walnuts" },
     { name: "Vegetable Besan Cheela", portion: "1 medium cheela with mint chutney" },
-    { name: "Apple Slices with Cinnamon", portion: "1 small apple" },
-    { name: "Roasted Chana & Green Tea", portion: "1 fistful roasted chana" },
   ];
 
   /* 8 Daily Habits */
@@ -701,8 +681,15 @@
      State & Persistence
      ========================================================= */
   function blankMeal() {
-    return { eaten: false, at: null, note: "" };
+    return {
+      food: "",       // What the user actually ate (e.g. "3 rotis and bhindi sabzi")
+      portion: "",    // Quantity (e.g. "3 medium rotis, 1 bowl bhindi")
+      note: "",       // Optional notes (e.g. "Felt light after my walk")
+      eaten: false,   // Eaten status
+      at: null,       // Timestamp when marked eaten
+    };
   }
+
   function blankDay() {
     return {
       meals: {
@@ -720,7 +707,7 @@
       sleep: { bed: "23:00", wake: "07:00", routine: false, at: null },
       steps: null,
       stepsSource: null, // "manual" | "device" | "pedometer" | "sample" | null
-      foods: [],
+      foods: [], // Extra custom food entries (+ Add Food)
       active: null,
     };
   }
@@ -757,7 +744,6 @@
     },
     days: {},
     weights: [],
-    ladduBatches: [],
     seededThrough: null,
     ui: {
       view: "home",
@@ -771,7 +757,6 @@
   function seedSampleData() {
     const now = today();
     const wkStart = startOfWeek(now);
-    const dayOffset = (now - wkStart) / 86400000;
 
     state.weights = [
       { date: iso(addDays(now, -21)), kg: 74.6 },
@@ -780,75 +765,50 @@
       { date: iso(now), kg: 73.5 },
     ];
 
-    state.ladduBatches = [
-      {
-        id: "batch-demo",
-        name: "Atta-Til-Gond Laddus",
-        sample: true,
-        ingredients: [
-          { name: "Whole-wheat atta", grams: 250 },
-          { name: "Desi ghee", grams: 100 },
-          { name: "Sesame seeds (til)", grams: 80 },
-          { name: "Gond (edible gum)", grams: 50 },
-          { name: "Jaggery (gud)", grams: 120 },
-          { name: "Almonds", grams: 60 },
-        ],
-        count: 14,
-        created: Date.now() - 3 * 86400000,
-      },
-    ];
-
-    // Seed the 7 days of the active week (Monday to Sunday)
+    // Per Requirement 5: A new user's diary should start empty unless they deliberately choose to load sample data.
+    // Initialize all 7 days of the active week with clean, blank meal diaries!
     for (let i = 0; i < 7; i++) {
       const d = addDays(wkStart, i);
       const key = iso(d);
       if (!state.days[key]) state.days[key] = blankDay();
       const rec = state.days[key];
-      const rand = seededRand(key);
       const isPast = d < now;
       const isToday = d.getTime() === now.getTime();
+      const rand = seededRand(key);
 
+      // Meal diary starts completely clean and blank
+      MEAL_SLOTS.forEach((slot) => {
+        rec.meals[slot.key] = blankMeal();
+      });
+      rec.foods = [];
+
+      // Walking & hydration demo baselines
       if (isPast) {
-        // Complete past days with high consistency
-        MEAL_SLOTS.forEach((slot, si) => {
-          rec.meals[slot.key].eaten = true;
-          const h = [8, 13, 17, 20, 11][si];
-          rec.meals[slot.key].at = new Date(d.getFullYear(), d.getMonth(), d.getDate(), h, 15 + Math.floor(rand() * 30)).getTime();
-        });
         rec.water = state.profile.waterGlasses;
         rec.sleep.bed = "22:45";
         rec.sleep.wake = "06:45";
         rec.sleep.routine = true;
         rec.sleep.at = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 0).getTime();
 
-        const lMins = 30 + Math.floor(rand() * 5);
-        const eMins = 30 + Math.floor(rand() * 5);
+        const lMins = 30;
+        const eMins = 30;
         rec.walks.lunch.minutes = lMins;
         rec.walks.lunch.sessions = [{
           id: uid(), date: key,
           start: new Date(d.getFullYear(), d.getMonth(), d.getDate(), 13, 45).getTime(),
-          end: new Date(d.getFullYear(), d.getMonth(), d.getDate(), 13, 45 + lMins).getTime(),
+          end: new Date(d.getFullYear(), d.getMonth(), d.getDate(), 14, 15).getTime(),
           minutes: lMins, complete: true, sample: true,
         }];
         rec.walks.evening.minutes = eMins;
         rec.walks.evening.sessions = [{
           id: uid(), date: key,
           start: new Date(d.getFullYear(), d.getMonth(), d.getDate(), 20, 30).getTime(),
-          end: new Date(d.getFullYear(), d.getMonth(), d.getDate(), 20, 30 + eMins).getTime(),
+          end: new Date(d.getFullYear(), d.getMonth(), d.getDate(), 21, 0).getTime(),
           minutes: eMins, complete: true, sample: true,
         }];
-        rec.steps = 7400 + Math.floor(rand() * 1400);
+        rec.steps = 7200 + Math.floor(rand() * 1200);
         rec.stepsSource = "sample";
       } else if (isToday) {
-        // Today has realistic progress: Breakfast & Lunch eaten, Lunch walk done, Afternoon hydration
-        rec.meals.breakfast.eaten = true;
-        rec.meals.breakfast.at = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 8, 30).getTime();
-        rec.meals.lunch.eaten = true;
-        rec.meals.lunch.at = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 13, 15).getTime();
-        rec.meals.snack.eaten = false;
-        rec.meals.dinner.eaten = false;
-        rec.meals.extra.eaten = false;
-
         rec.walks.lunch.minutes = 30;
         rec.walks.lunch.sessions = [{
           id: uid(), date: key,
@@ -858,8 +818,7 @@
         }];
         rec.walks.evening.minutes = 0;
         rec.walks.evening.sessions = [];
-
-        rec.water = 5; // 5 of 8 glasses
+        rec.water = 5;
         rec.sleep.bed = "23:00";
         rec.sleep.wake = "07:00";
         rec.sleep.routine = false;
@@ -870,13 +829,51 @@
     state.seededThrough = todayKey();
   }
 
+  // Optional helper to load realistic user meals for demo if the user chooses
+  function loadDemoSampleMeals() {
+    const key = todayKey();
+    const d = getDay(key);
+    d.meals.breakfast = {
+      food: "1 roti with bhindi and 1 cup milk",
+      portion: "1 phulka, 1 katori sabzi, 200 ml milk",
+      note: "Felt warm and comfortable",
+      eaten: true,
+      at: new Date(today().getFullYear(), today().getMonth(), today().getDate(), 8, 30).getTime(),
+    };
+    d.meals.lunch = {
+      food: "3 rotis and bhindi sabzi",
+      portion: "3 medium rotis, 1 bowl bhindi",
+      note: "Felt light after my walk",
+      eaten: true,
+      at: new Date(today().getFullYear(), today().getMonth(), today().getDate(), 13, 20).getTime(),
+    };
+    d.meals.snack = {
+      food: "1 fruit and roasted chana",
+      portion: "1 small apple + 1 fistful chana",
+      note: "",
+      eaten: false,
+      at: null,
+    };
+    d.meals.dinner = {
+      food: "Rice, dal and vegetables",
+      portion: "1 bowl rice, 1 bowl toor dal, seasonal sabzi",
+      note: "",
+      eaten: false,
+      at: null,
+    };
+    saveNow();
+    renderCurrent();
+    renderNav();
+    toast("Sample meals loaded for today! ✓");
+  }
+
   function loadState() {
     const saved = Store.get();
     if (saved && saved.profile && saved.days) {
       state = saved;
       if (!state.ui) state.ui = { view: "home", mealsDay: todayKey(), mealsFilter: "all", progressRange: "week", deviceFrame: false };
-      if (!state.ladduBatches) state.ladduBatches = [];
       if (!state.weights) state.weights = [];
+      // Clean up legacy states if any
     } else {
       seedSampleData();
       saveNow();
@@ -902,9 +899,8 @@
      Calculations & Metrics
      ========================================================= */
   function mealsPlannedFor(key) {
-    const d = parseISO(key);
-    const plan = PLAN[dayIndex(d)];
-    return MEAL_SLOTS.filter((s) => !!plan[s.key]).length;
+    // 5 planned meal categories per day
+    return MEAL_SLOTS.length;
   }
   function mealsEaten(key) {
     const d = getDay(key);
@@ -944,10 +940,10 @@
     const d = getDay(key);
     const goal = state.profile.walkSessionGoal;
     return {
-      breakfast: { done: !!d.meals.breakfast.eaten, at: d.meals.breakfast.at },
-      lunch: { done: !!d.meals.lunch.eaten, at: d.meals.lunch.at },
-      snack: { done: !!d.meals.snack.eaten, at: d.meals.snack.at },
-      dinner: { done: !!d.meals.dinner.eaten, at: d.meals.dinner.at },
+      breakfast: { done: !!d.meals.breakfast.eaten, at: d.meals.breakfast.at, food: d.meals.breakfast.food },
+      lunch: { done: !!d.meals.lunch.eaten, at: d.meals.lunch.at, food: d.meals.lunch.food },
+      snack: { done: !!d.meals.snack.eaten, at: d.meals.snack.at, food: d.meals.snack.food },
+      dinner: { done: !!d.meals.dinner.eaten, at: d.meals.dinner.at, food: d.meals.dinner.food },
       walkLunch: { done: (d.walks.lunch.minutes || 0) >= goal, at: lastWalkEnd(d.walks.lunch) },
       walkEvening: { done: (d.walks.evening.minutes || 0) >= goal, at: lastWalkEnd(d.walks.evening) },
       water: { done: d.water >= state.profile.waterGlasses && d.water > 0, at: null },
@@ -963,7 +959,6 @@
   }
 
   function overallPct(key) {
-    // Balanced 4-pillar average: meals, walking, water, habits
     const m = mealPct(key);
     const w = walkPct(key);
     const h = waterPct(key);
@@ -994,7 +989,6 @@
   function kcalBurned(key) {
     const mins = walkMinutes(key);
     if (mins <= 0) return 0;
-    // 3.3 METs for moderate walking: kcal = 3.3 * weightKg * (minutes / 60)
     return 3.3 * weightForCalc() * (mins / 60);
   }
   function kcalIsEstimated() {
@@ -1170,9 +1164,19 @@
 
   function renderHabitList(key) {
     const h = habitsFor(key);
+    const d = getDay(key);
+
     return `<div class="stack" style="gap:8px">${HABITS.map((item) => {
       const st = h[item.key];
       const atStr = st.at ? fmtTime(st.at) : "";
+
+      let labelText = item.label;
+      if (["breakfast", "lunch", "snack", "dinner"].indexOf(item.key) !== -1) {
+        const m = d.meals[item.key];
+        if (m && m.food) {
+          labelText = `${item.label.split(" ")[0]}: ${m.food}`;
+        }
+      }
 
       return `<div class="habit-item ${st.done ? "done" : ""}">
         <button class="habit-check-btn ${st.done ? "checked" : ""}" data-action="toggle-habit" data-habit="${item.key}"
@@ -1180,7 +1184,7 @@
           ${icon("check", 16)}
         </button>
         <div class="habit-main">
-          <div class="habit-title">${item.label}</div>
+          <div class="habit-title">${escapeHtml(labelText)}</div>
           <div class="habit-sub ${st.done ? "highlight" : ""}">
             ${st.done ? `${icon("check", 12)} Completed ${atStr ? "at " + atStr : ""}` : "Tap checkbox to mark complete"}
           </div>
@@ -1385,10 +1389,10 @@
                 ${icon("play", 15)} Start ${getDay(key).walks.lunch.minutes >= state.profile.walkSessionGoal ? "Evening" : "Lunch"} Walk
               </button>
               <button class="btn btn-blush btn-sm" data-action="quick-log-meal">
-                ${icon("plus", 15)} Log meal / snack
+                ${icon("plus", 15)} + Add Food
               </button>
               <button class="btn btn-soft btn-sm" data-nav="meals">
-                ${icon("meal", 15)} 7-day plan
+                ${icon("meal", 15)} 7-day diary
               </button>
               <button class="btn btn-lav btn-sm" data-action="water-plus">
                 ${icon("water", 15)} +1 Glass water
@@ -1455,7 +1459,7 @@
   }
 
   /* =========================================================
-     SEVEN-DAY MEAL PLAN
+     SEVEN-DAY MEAL PLAN (PERSONAL FOOD DIARY)
      ========================================================= */
   function renderMeals() {
     const wkStart = startOfWeek(today());
@@ -1473,8 +1477,6 @@
 
     // Filter meals for view
     const visibleSlots = MEAL_SLOTS.filter((slot) => {
-      const item = plan[slot.key];
-      if (!item) return false;
       const isEaten = !!day.meals[slot.key].eaten;
       if (filter === "completed") return isEaten;
       if (filter === "remaining") return !isEaten;
@@ -1484,10 +1486,13 @@
     $("#view-meals").innerHTML = `
       <div class="row" style="justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
         <div>
-          <h1 id="mealsTitle" style="font-size:22px;font-weight:800;letter-spacing:-.03em">Seven-day meal chart</h1>
-          <div class="card-sub">Vegetarian, PCOS-friendly, flexible portions</div>
+          <h1 id="mealsTitle" style="font-size:22px;font-weight:800;letter-spacing:-.03em">Seven-day food diary</h1>
+          <div class="card-sub">Log what you actually eat · Tap Edit on any card to update</div>
         </div>
-        <span class="pill sage">${eaten} of ${planned} eaten</span>
+        <div class="row" style="gap:8px">
+          <span class="pill sage">${eaten} of ${planned} eaten</span>
+          <button class="btn btn-blush btn-sm" data-action="quick-log-meal">${icon("plus", 14)} + Add Food</button>
+        </div>
       </div>
 
       <!-- Monday through Sunday tabs -->
@@ -1509,27 +1514,26 @@
         <div class="row" style="justify-content:space-between;flex-wrap:wrap;gap:10px">
           <div>
             <div class="card-title" style="font-size:17px">${DAY_NAMES[idx]}, ${fmtDateShort(parseISO(sel))}</div>
-            <div class="card-sub">${eaten} of ${planned} meals eaten · No extreme restrictions</div>
+            <div class="card-sub">${eaten} of ${planned} planned meals marked eaten</div>
           </div>
-          <div class="row" style="gap:8px;flex-wrap:wrap">
-            <button class="btn btn-ghost btn-sm" data-action="open-laddu">${icon("food", 15)} Laddu calculator</button>
-            <button class="btn btn-blush btn-sm" data-action="quick-log-meal">${icon("plus", 15)} Quick log food</button>
+          <div class="row" style="gap:8px">
+            <button class="btn btn-soft btn-sm" data-action="quick-log-meal">${icon("plus", 14)} + Add Food</button>
           </div>
         </div>
         <div class="bar blush thin" style="margin-top:12px"><span style="width:${Math.round(mealPct(sel) * 100)}%"></span></div>
 
-        <!-- Filter bar to view completed meals -->
+        <!-- Filter bar -->
         <div class="row" style="justify-content:space-between;align-items:center;margin-top:14px;flex-wrap:wrap;gap:8px">
           <div class="filter-bar" role="group" aria-label="Filter meals">
             <button class="filter-btn" data-action="filter-meals" data-filter="all" aria-pressed="${filter === "all"}">All meals (${planned})</button>
             <button class="filter-btn" data-action="filter-meals" data-filter="completed" aria-pressed="${filter === "completed"}">Completed (${eaten})</button>
             <button class="filter-btn" data-action="filter-meals" data-filter="remaining" aria-pressed="${filter === "remaining"}">Remaining (${planned - eaten})</button>
           </div>
-          <div class="hint" style="font-size:11.5px">Tick "Eaten" when you finish each meal</div>
+          <div class="hint" style="font-size:11.5px">Edit food anytime · Mark as Eaten when finished</div>
         </div>
       </div>
 
-      <!-- Meals Stack -->
+      <!-- Meal Cards Stack -->
       <div class="stack" style="margin-bottom:16px">
         ${visibleSlots.length === 0 ? `
           <div class="card empty" style="text-align:center;padding:28px">
@@ -1538,51 +1542,72 @@
           </div>
         ` : visibleSlots.map((slot) => {
           const item = plan[slot.key];
-          const m = day.meals[slot.key];
+          const m = day.meals[slot.key] || blankMeal();
+          const hasFood = !!(m.food && m.food.trim());
+
           return `<div class="meal ${m.eaten ? "done" : ""}">
-            <div class="meal-top">
-              <button class="meal-eaten-btn ${m.eaten ? "checked" : ""}" data-action="toggle-meal" data-slot="${slot.key}"
-                aria-label="Mark ${slot.label} as eaten">
-                ${icon("check", 14)}
-                <span>Eaten</span>
-              </button>
-              <div style="flex:1;min-width:0">
-                <div class="row" style="justify-content:space-between;align-items:flex-start;gap:8px">
-                  <div>
-                    <div class="meal-name">
-                      <span class="txt">${item.name}</span>
-                      ${m.eaten ? `<span class="pill sage" style="font-size:10px;padding:2px 8px">${icon("check", 11)} Eaten</span>` : ""}
-                    </div>
-                    <div class="row" style="gap:6px;margin-top:4px;flex-wrap:wrap">
-                      <span class="pill plain" style="font-size:10.5px;padding:2px 8px">${slot.label}</span>
-                      <span class="meal-portion">${item.portion}</span>
-                    </div>
-                  </div>
-                  <span class="meal-time">${slot.window}</span>
-                </div>
-                <div class="meal-desc">${item.desc}</div>
-                <div class="meal-foot">
-                  <input class="meal-note" data-note="${slot.key}" value="${escapeAttr(m.note || "")}"
-                    placeholder="Notes: substitutions, hunger level, how you felt…" aria-label="Notes for ${slot.label}">
-                  ${m.at ? `<span class="hint" style="font-size:11.5px">${m.eaten ? "Logged at " + fmtTime(m.at) : ""}</span>` : ""}
-                </div>
+            <!-- Header: Category & Planned Time & Status -->
+            <div class="meal-header">
+              <div class="row" style="gap:8px;align-items:center">
+                <span class="meal-cat-title">${slot.label}</span>
+                <span class="meal-time-badge">· ${slot.window}</span>
               </div>
+              <div>
+                ${m.eaten
+                  ? `<span class="pill sage">${icon("check", 12)} Eaten</span>`
+                  : hasFood
+                  ? `<span class="pill lav">Logged</span>`
+                  : `<span class="pill plain" style="color:var(--plum-faint)">Not logged yet</span>`
+                }
+              </div>
+            </div>
+
+            <!-- Body: User's actual food entry or No meal logged yet -->
+            <div class="meal-body">
+              ${hasFood ? `
+                <div class="meal-food-entry">${escapeHtml(m.food)}</div>
+                ${m.portion ? `<div class="meal-portion-text"><strong>Quantity:</strong> ${escapeHtml(m.portion)}</div>` : ""}
+                ${m.note ? `<div class="meal-notes-text"><strong>Notes:</strong> ${escapeHtml(m.note)}</div>` : ""}
+                ${m.at && m.eaten ? `<div class="hint" style="font-size:11.5px;margin-top:2px">Marked eaten at ${fmtTime(m.at)}</div>` : ""}
+              ` : `
+                <div style="font-size:13.5px;color:var(--plum-faint);font-style:italic;padding:4px 0">No meal logged yet</div>
+              `}
+            </div>
+
+            <!-- Separate clearly labeled optional idea box -->
+            <div class="card-suggestion">
+              <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:3px">
+                <span class="eyebrow" style="font-size:10px;color:var(--plum-faint)">PCOS Idea (Optional)</span>
+                <button class="btn btn-ghost btn-sm" style="min-height:22px;height:22px;padding:0 8px;font-size:11px" data-action="fill-suggestion" data-slot="${slot.key}">Use idea</button>
+              </div>
+              <div style="font-weight:700;color:var(--plum)">${item.name} <span style="font-weight:500;color:var(--plum-soft)">· ${item.portion}</span></div>
+              <div style="color:var(--plum-faint);margin-top:2px;font-size:11.5px">${item.desc}</div>
+            </div>
+
+            <!-- Actions Row: Edit Button and Mark as Eaten Button -->
+            <div class="meal-actions-row">
+              <button class="btn btn-soft btn-sm" data-action="open-edit-meal" data-slot="${slot.key}" aria-label="Edit ${slot.label}">
+                ${icon("edit", 14)} Edit
+              </button>
+              <button class="btn ${m.eaten ? "btn-sage" : "btn-soft"} btn-sm" data-action="toggle-meal-eaten" data-slot="${slot.key}">
+                ${icon("check", 14)} ${m.eaten ? "Eaten ✓" : "Mark as Eaten"}
+              </button>
             </div>
           </div>`;
         }).join("")}
       </div>
 
-      <!-- Food Diary Section -->
+      <!-- Food Diary Section (+ Add Food) -->
       <div class="card" style="margin-bottom:14px">
         <div class="card-head">
           <div>
-            <div class="card-title">Daily food diary · ${DAY_SHORT[idx]}</div>
-            <div class="card-sub">Snacks and foods logged outside the meal chart</div>
+            <div class="card-title">Extra foods &amp; drinks diary · ${DAY_SHORT[idx]}</div>
+            <div class="card-sub">Record additional snacks, tiffins, or drinks outside the main 5 meal categories</div>
           </div>
-          <button class="btn btn-soft btn-sm" data-action="quick-log-meal">${icon("plus", 14)} Add food</button>
+          <button class="btn btn-soft btn-sm" data-action="quick-log-meal">${icon("plus", 14)} + Add Food</button>
         </div>
         ${diary.length === 0
-          ? `<div class="empty" style="text-align:center;padding:16px;color:var(--plum-faint)">No custom food logged for this day. Use "Quick log food" for unexpected snacks or tiffins.</div>`
+          ? `<div class="empty" style="text-align:center;padding:16px;color:var(--plum-faint)">No extra foods logged today. Use "+ Add Food" to record any drinks or extra snacks.</div>`
           : `<div class="list">${diary.map((f) => `
               <div class="list-item" style="padding:10px 0;border-bottom:1px solid var(--line)">
                 <div class="row" style="justify-content:space-between;align-items:center">
@@ -1597,60 +1622,7 @@
                 </div>
               </div>`).join("")}</div>`}
       </div>
-
-      <!-- Homemade Laddu Batches Section -->
-      <div class="card">
-        <div class="card-head">
-          <div>
-            <div class="card-title">Homemade laddu batches</div>
-            <div class="card-sub">Atta, til (sesame), gond &amp; dry-fruit batches</div>
-          </div>
-          <button class="btn btn-ghost btn-sm" data-action="open-laddu">${icon("plus", 14)} New batch</button>
-        </div>
-        ${state.ladduBatches.length === 0
-          ? `<div class="empty" style="text-align:center;padding:16px;color:var(--plum-faint)">No batches saved yet. Enter your recipe ingredients to calculate nutrition per laddu!</div>`
-          : `<div class="stack" style="gap:10px">${state.ladduBatches.map((b) => {
-              const per = perLaddu(b);
-              return `<div class="card tint-lav" style="padding:14px">
-                <div class="row" style="justify-content:space-between;align-items:flex-start">
-                  <div>
-                    <div style="font-weight:800;font-size:15px">${escapeHtml(b.name)} ${b.sample ? '<span class="pill plain" style="font-size:9px">Sample</span>' : ""}</div>
-                    <div style="font-size:12px;color:var(--plum-soft);margin-top:2px">${b.count} laddus batch · ≈${per.kcal} kcal, ${per.protein}g protein, ${per.fibre}g fibre, ${per.iron}mg iron each</div>
-                  </div>
-                  <div class="row" style="gap:6px">
-                    <button class="btn btn-blush btn-sm" data-action="log-laddu" data-id="${b.id}" style="padding:0 12px;font-size:12px">Log 1 Laddu</button>
-                    <button class="btn btn-ghost btn-icon btn-sm" data-action="delete-laddu" data-id="${b.id}">${icon("trash", 14)}</button>
-                  </div>
-                </div>
-              </div>`;
-            }).join("")}</div>`}
-        <div class="hint" style="margin-top:10px">Nutritional estimates are approximate, based on standard raw ingredient averages.</div>
-      </div>
     `;
-  }
-
-  function perLaddu(batch) {
-    let totKcal = 0, totProt = 0, totFibre = 0, totFat = 0, totIron = 0;
-    (batch.ingredients || []).forEach((item) => {
-      const ing = INGREDIENTS.find((x) => x.name === item.name);
-      if (ing && item.grams > 0) {
-        const factor = item.grams / 100;
-        totKcal += (ing.kcal || 0) * factor;
-        totProt += (ing.protein || 0) * factor;
-        totFibre += (ing.fibre || 0) * factor;
-        totFat += (ing.fat || 0) * factor;
-        totIron += (ing.iron || 0) * factor;
-      }
-    });
-    const c = Math.max(1, batch.count || 1);
-    return {
-      kcal: Math.round(totKcal / c),
-      protein: round1(totProt / c),
-      fibre: round1(totFibre / c),
-      fat: round1(totFat / c),
-      iron: round1(totIron / c),
-      totalKcal: Math.round(totKcal),
-    };
   }
 
   /* =========================================================
@@ -2068,7 +2040,6 @@
   function achievements() {
     const key = todayKey();
     const d = getDay(key);
-    const wMins = walkMinutes(key);
     return [
       {
         title: "Mindful Plate",
@@ -2219,10 +2190,11 @@
             </div>
           </div>
           <div class="actions" style="margin-top:14px">
+            <button class="btn btn-soft btn-sm" data-action="load-sample-meals">${icon("meal", 14)} Load Sample Meals (Demo)</button>
             <button class="btn btn-soft btn-sm" data-action="export-data">${icon("sparkle", 14)} Export Data (JSON)</button>
             <button class="btn btn-danger btn-sm" data-action="reset-data">${icon("trash", 14)} Reset All Data</button>
           </div>
-          <div class="hint" style="margin-top:10px">Resetting clears local storage and re-seeds fresh sample demo data.</div>
+          <div class="hint" style="margin-top:10px">Resetting clears local storage and restores a fresh empty food diary.</div>
         </div>
       </div>
     `;
@@ -2429,7 +2401,6 @@
     }
 
     function confirmDiscard() {
-      // Must ask for confirmation before discarding an active session per specification
       setTimeout(() => {
         openModal({
           title: "Discard this session?",
@@ -2456,7 +2427,7 @@
           ],
         });
       }, 150);
-      return true; // keep modal handling clean
+      return true;
     }
   }
 
@@ -2482,7 +2453,7 @@
   }
 
   /* =========================================================
-     Habit Toggling Action
+     Habit Toggling Action (from Checklist)
      ========================================================= */
   function toggleHabit(habitKey) {
     const key = todayKey();
@@ -2497,7 +2468,7 @@
         const next = !d.meals[habitKey].eaten;
         d.meals[habitKey].eaten = next;
         d.meals[habitKey].at = next ? Date.now() : null;
-        toast(next ? `${HABITS.find((h) => h.key === habitKey).label} marked! 💗` : "Meal habit unchecked");
+        toast(next ? `${HABITS.find((h) => h.key === habitKey).label} marked! 💗` : "Meal marked as not eaten");
         break;
       }
       case "walkLunch": {
@@ -2557,7 +2528,7 @@
   }
 
   /* =========================================================
-     Meal Actions
+     Meal Actions: Edit Meal Modal & Mark as Eaten
      ========================================================= */
   function selectDay(dayKey) {
     state.ui.mealsDay = dayKey;
@@ -2565,16 +2536,114 @@
     renderMeals();
   }
 
-  function toggleMeal(slot) {
+  // Opens clean modal to edit actual food items eaten, quantity, notes, without auto-marking eaten
+  function openEditMeal(slotKey) {
     const key = state.ui.mealsDay || todayKey();
     const d = getDay(key);
-    const next = !d.meals[slot].eaten;
-    d.meals[slot].eaten = next;
-    d.meals[slot].at = next ? Date.now() : null;
+    const m = d.meals[slotKey] || blankMeal();
+    const slot = MEAL_SLOTS.find((s) => s.key === slotKey) || { label: "Meal" };
+
+    openModal({
+      title: `Edit ${slot.label}`,
+      sub: `${dayLabel(key)} · Enter what you actually ate`,
+      body: `
+        <div class="field" style="margin-bottom:12px">
+          <label class="label" for="em-name">Meal Category</label>
+          <input class="input" id="em-name" value="${escapeAttr(slot.label)}" readonly style="background:var(--surface-2)">
+        </div>
+
+        <div class="field" style="margin-bottom:12px">
+          <label class="label" for="em-food">Food items eaten</label>
+          <textarea class="input" id="em-food" placeholder="e.g. 3 rotis and bhindi sabzi" style="min-height:56px">${escapeHtml(m.food || "")}</textarea>
+          <div class="hint">Type whatever you actually ate, even if different from the app's idea.</div>
+        </div>
+
+        <div class="field" style="margin-bottom:12px">
+          <label class="label" for="em-portion">Quantity or portion size</label>
+          <input class="input" id="em-portion" placeholder="e.g. 3 medium rotis, 1 bowl bhindi" value="${escapeAttr(m.portion || "")}">
+        </div>
+
+        <div class="field" style="margin-bottom:14px">
+          <label class="label" for="em-note">Optional notes</label>
+          <textarea class="input" id="em-note" placeholder="e.g. Felt light after my walk, drank water 30 min later" style="min-height:56px">${escapeHtml(m.note || "")}</textarea>
+        </div>
+
+        <div class="switch-row" style="background:var(--surface-2);padding:10px 14px;border-radius:var(--r-sm);border:1px solid var(--line)">
+          <div class="switch-text">
+            <div class="switch-title">Mark as eaten</div>
+            <div class="switch-desc">Preserves current status unless you explicitly change it</div>
+          </div>
+          <label class="switch" aria-label="Mark as eaten">
+            <input type="checkbox" id="em-eaten" ${m.eaten ? "checked" : ""}>
+            <span class="track"></span><span class="thumb"></span>
+          </label>
+        </div>
+      `,
+      actions: [
+        { label: "Cancel", kind: "btn-soft" }, // Discards unsaved edits per Requirement 6
+        {
+          label: "Save Changes", kind: "btn-primary", onClick: () => {
+            const foodVal = $("#em-food").value.trim();
+            const portionVal = $("#em-portion").value.trim();
+            const noteVal = $("#em-note").value.trim();
+            const eatenVal = $("#em-eaten").checked;
+
+            m.food = foodVal;
+            m.portion = portionVal;
+            m.note = noteVal;
+
+            // Preserve or update eaten completion state
+            if (eatenVal !== m.eaten) {
+              m.eaten = eatenVal;
+              m.at = eatenVal ? Date.now() : null;
+            }
+
+            d.meals[slotKey] = m;
+            saveNow();
+            renderMeals();
+            renderNav();
+            toast(`${slot.label} updated successfully! ✓`);
+          },
+        },
+      ],
+    });
+  }
+
+  // Toggles the "Eaten" status separately from editing food details
+  function toggleMealEaten(slotKey) {
+    const key = state.ui.mealsDay || todayKey();
+    const d = getDay(key);
+    const m = d.meals[slotKey] || blankMeal();
+
+    const next = !m.eaten;
+    m.eaten = next;
+    m.at = next ? Date.now() : null;
+
+    d.meals[slotKey] = m;
     saveNow();
     renderMeals();
     renderNav();
-    toast(next ? "Meal marked as eaten ✓" : "Meal unchecked");
+    toast(next ? "Marked as eaten ✓" : "Marked as not eaten");
+  }
+
+  // Optional convenience helper to fill suggestion into meal card without marking as eaten
+  function fillSuggestion(slotKey) {
+    const key = state.ui.mealsDay || todayKey();
+    const idx = dayIndex(parseISO(key));
+    const idea = PLAN[idx][slotKey];
+    if (!idea) return;
+
+    const d = getDay(key);
+    const m = d.meals[slotKey] || blankMeal();
+    m.food = idea.name;
+    m.portion = idea.portion;
+    m.note = idea.desc;
+    // Does NOT mark as eaten automatically per requirements!
+    d.meals[slotKey] = m;
+    saveNow();
+    renderMeals();
+    renderNav();
+    toast("Idea loaded into meal. Tap Edit to customize!");
   }
 
   function addWater(delta) {
@@ -2643,7 +2712,6 @@
       actions: [{ label: "Close", kind: "btn-primary" }],
     });
 
-    // Wire up options
     $("#btnEnableMotion").addEventListener("click", () => {
       enableLiveMotionSensor();
     });
@@ -2697,7 +2765,7 @@
       const mag = Math.sqrt((acc.x || 0)**2 + (acc.y || 0)**2 + (acc.z || 0)**2);
       const delta = mag - lastAccMagnitude;
       lastAccMagnitude = mag;
-      if (delta > 3.2) { // Step peak threshold
+      if (delta > 3.2) {
         const rec = getDay(todayKey());
         rec.steps = (rec.steps || 0) + 1;
         save();
@@ -2799,48 +2867,48 @@
   }
 
   /* =========================================================
-     Quick Add Food & Diary
+     Generic Quick Log Food (+ Add Food)
      ========================================================= */
   function openQuickLogMeal() {
     const key = state.ui.mealsDay || todayKey();
     const d = getDay(key);
 
     openModal({
-      title: "Log food or snack",
-      sub: `${dayLabel(key)} · for items outside the meal plan`,
+      title: "+ Add Food / Drink",
+      sub: `${dayLabel(key)} · Record any food, extra snack or drink`,
       body: `
-        <div class="label" style="margin-bottom:6px">Select popular PCOS snacks or type below</div>
+        <div class="label" style="margin-bottom:6px">Quick food ideas or type below</div>
         <div class="chip-group" style="margin-bottom:12px" id="snackChips">
           ${SNACK_SUGGESTIONS.map((s) => `<button class="chip" data-sname="${escapeAttr(s.name)}" data-sport="${escapeAttr(s.portion)}">${s.name}</button>`).join("")}
         </div>
 
         <div class="field" style="margin-bottom:12px">
-          <label class="label" for="m-food">Food name</label>
-          <input class="input" id="m-food" placeholder="e.g. Roasted Makhana, Boiled Egg, Paneer Tikka">
+          <label class="label" for="m-food">Food or drink name</label>
+          <input class="input" id="m-food" placeholder="e.g. 3 rotis and bhindi sabzi, green tea, buttermilk">
         </div>
         <div class="field" style="margin-bottom:12px">
-          <label class="label" for="m-portion">Portion size</label>
-          <input class="input" id="m-portion" placeholder="e.g. 1 small bowl / 2 pieces / 150g">
+          <label class="label" for="m-portion">Quantity or portion</label>
+          <input class="input" id="m-portion" placeholder="e.g. 1 bowl, 2 pieces, 250 ml">
         </div>
         <div class="field" style="margin-bottom:12px">
-          <label class="label" for="m-slot">Meal category</label>
+          <label class="label" for="m-slot">Category</label>
           <select class="input" id="m-slot">
             <option value="snack">Evening snack</option>
-            <option value="extra">Extra snack / fruit</option>
+            <option value="extra">Extra snack / drink</option>
             <option value="breakfast">Breakfast</option>
             <option value="lunch">Lunch</option>
             <option value="dinner">Dinner</option>
           </select>
         </div>
         <div class="field">
-          <label class="label" for="m-note">Notes (substitutions, hunger, satiety)</label>
-          <input class="input" id="m-note" placeholder="How did you feel after eating?">
+          <label class="label" for="m-note">Notes (optional)</label>
+          <input class="input" id="m-note" placeholder="e.g. Felt energized, homemade, restaurant plate">
         </div>
       `,
       actions: [
         { label: "Cancel", kind: "btn-soft" },
         {
-          label: "Save to food diary", kind: "btn-blush", onClick: () => {
+          label: "Save to diary", kind: "btn-blush", onClick: () => {
             const name = $("#m-food").value.trim();
             if (!name) { toast("Please enter a food name"); return true; }
             d.foods.push({
@@ -2852,8 +2920,8 @@
               at: Date.now(),
             });
             saveNow();
-            renderCurrent();
-            toast("Logged to daily food diary ✓");
+            renderMeals();
+            toast("Added to food diary ✓");
           },
         },
       ],
@@ -2867,152 +2935,6 @@
         chip.classList.add("active");
       });
     });
-  }
-
-  /* =========================================================
-     Homemade Laddu Recipe Calculator
-     ========================================================= */
-  function openLaddu() {
-    let rows = [
-      { name: "Whole-wheat atta", grams: 200 },
-      { name: "Desi ghee", grams: 80 },
-      { name: "Sesame seeds (til)", grams: 60 },
-      { name: "Gond (edible gum)", grams: 40 },
-      { name: "Jaggery (gud)", grams: 90 },
-      { name: "Almonds", grams: 50 },
-    ];
-
-    openModal({
-      title: "Homemade laddu batch calculator",
-      sub: "Atta, sesame (til), gond & dry-fruit recipe nutrition estimator",
-      body: `
-        <div class="field" style="margin-bottom:12px">
-          <label class="label" for="l-name">Batch name</label>
-          <input class="input" id="l-name" value="Nourishing Atta-Til-Gond Laddus">
-        </div>
-        <div class="label" style="margin-bottom:8px">Ingredients &amp; amounts (grams)</div>
-        <div id="l-rows" class="stack" style="gap:8px"></div>
-        <button class="btn btn-soft btn-sm" id="l-add" style="margin-top:10px">${icon("plus", 14)} Add ingredient</button>
-
-        <div class="field" style="margin-top:14px">
-          <label class="label" for="l-count">Total laddus made</label>
-          <input class="input" id="l-count" type="number" min="1" max="100" value="12">
-        </div>
-
-        <div class="card tint-sage" style="margin-top:14px;padding:14px" id="l-preview"></div>
-        <div class="hint" style="margin-top:8px"><strong>Important:</strong> Nutritional values are approximate estimates based on standard Indian raw ingredient values. Actual nutrition varies with cooking and portioning.</div>
-      `,
-      actions: [
-        { label: "Cancel", kind: "btn-soft" },
-        { label: "Save batch", kind: "btn-primary", onClick: () => saveBatch() },
-      ],
-    });
-
-    const rowsEl = () => $("#l-rows");
-    function rowHtml(r, i) {
-      return `<div class="row" data-lrow="${i}" style="gap:8px">
-        <select class="input" data-lname style="flex:1.4" aria-label="Ingredient ${i + 1}">
-          ${INGREDIENTS.map((ing) => `<option value="${escapeAttr(ing.name)}" ${ing.name === r.name ? "selected" : ""}>${ing.name}</option>`).join("")}
-        </select>
-        <input class="input" data-lgrams type="number" min="1" max="2000" value="${r.grams}" style="flex:0 0 90px" aria-label="Grams">
-        <button class="btn btn-ghost btn-icon btn-sm" data-lremove="${i}" aria-label="Remove">${icon("trash", 14)}</button>
-      </div>`;
-    }
-
-    function paint() {
-      rowsEl().innerHTML = rows.map(rowHtml).join("");
-      updatePreview();
-    }
-
-    function updatePreview() {
-      const batch = readBatch();
-      const per = perLaddu(batch);
-      $("#l-preview").innerHTML = `
-        <div class="eyebrow" style="margin-bottom:6px">Estimated nutrition per laddu</div>
-        <div class="stats-3">
-          <div><div class="stat-val" style="font-size:18px">${per.kcal}</div><div class="stat-lab">Calories (kcal)</div></div>
-          <div><div class="stat-val" style="font-size:18px">${per.protein}g</div><div class="stat-lab">Protein</div></div>
-          <div><div class="stat-val" style="font-size:18px">${per.fibre}g</div><div class="stat-lab">Fibre</div></div>
-        </div>
-        <div class="row" style="justify-content:space-between;margin-top:8px;font-size:12px;color:var(--plum-soft)">
-          <span>Healthy Fats: ~${per.fat}g</span>
-          <span>Iron: ~${per.iron}mg</span>
-          <span>Batch total: ~${per.totalKcal} kcal</span>
-        </div>
-      `;
-    }
-
-    function readBatch() {
-      const ingredients = $$("#l-rows [data-lrow]").map((row) => ({
-        name: row.querySelector("[data-lname]").value,
-        grams: Number(row.querySelector("[data-lgrams]").value) || 0,
-      })).filter((x) => x.grams > 0);
-      return {
-        id: "preview",
-        name: $("#l-name").value.trim() || "Laddu batch",
-        ingredients,
-        count: Math.max(1, Number($("#l-count").value) || 1),
-      };
-    }
-
-    function saveBatch() {
-      const batch = readBatch();
-      if (!batch.ingredients.length) { toast("Add at least one ingredient"); return true; }
-      state.ladduBatches.unshift({
-        id: uid(),
-        name: batch.name,
-        ingredients: batch.ingredients,
-        count: batch.count,
-        created: Date.now(),
-      });
-      saveNow();
-      renderCurrent();
-      toast("Laddu batch recipe saved! ✓");
-    }
-
-    const sheet = $(".sheet");
-    sheet.addEventListener("click", (e) => {
-      if (e.target.closest("#l-add")) {
-        rows.push({ name: INGREDIENTS[0].name, grams: 50 });
-        paint();
-      }
-      const rm = e.target.closest("[data-lremove]");
-      if (rm) {
-        const i = Number(rm.getAttribute("data-lremove"));
-        if (rows.length > 1) { rows.splice(i, 1); paint(); }
-      }
-    });
-
-    sheet.addEventListener("input", (e) => {
-      if (e.target.matches("[data-lgrams],[data-lname],#l-count,#l-name")) {
-        if (e.target.matches("[data-lgrams],[data-lname]")) {
-          rows = $$("#l-rows [data-lrow]").map((row) => ({
-            name: row.querySelector("[data-lname]").value,
-            grams: Number(row.querySelector("[data-lgrams]").value) || 0,
-          }));
-        }
-        updatePreview();
-      }
-    });
-
-    paint();
-  }
-
-  function logLaddu(batchId) {
-    const b = state.ladduBatches.find((x) => x.id === batchId);
-    if (!b) return;
-    const per = perLaddu(b);
-    const key = state.ui.mealsDay || todayKey();
-    getDay(key).foods.push({
-      id: uid(),
-      name: b.name + " (1 laddu)",
-      portion: `≈${per.kcal} kcal, ${per.protein}g protein, ${per.fibre}g fibre`,
-      note: "Homemade batch snack · approximate nutrition",
-      at: Date.now(),
-    });
-    saveNow();
-    renderCurrent();
-    toast("1 Laddu logged to food diary! 💗");
   }
 
   /* =========================================================
@@ -3071,7 +2993,7 @@
       sub: "Clear all saved records and start fresh",
       body: `
         <div class="card tint-lav" style="padding:14px;color:var(--plum-soft)">
-          This will reset all your customized meals, walks, water and profile preferences, and restore the initial 7-day demo prototype state.
+          This will reset all your customized meals, walks, water and profile preferences, and restore a clean, empty food diary.
         </div>
       `,
       actions: [
@@ -3083,7 +3005,7 @@
             saveNow();
             renderCurrent();
             renderNav();
-            toast("All data reset to fresh demo week");
+            toast("All data reset to fresh clean start");
           },
         },
       ],
@@ -3120,7 +3042,9 @@
 
     switch (act) {
       case "toggle-habit": toggleHabit(el.getAttribute("data-habit")); break;
-      case "toggle-meal": toggleMeal(el.getAttribute("data-slot")); break;
+      case "open-edit-meal": openEditMeal(el.getAttribute("data-slot")); break;
+      case "toggle-meal-eaten": toggleMealEaten(el.getAttribute("data-slot")); break;
+      case "fill-suggestion": fillSuggestion(el.getAttribute("data-slot")); break;
       case "select-day": selectDay(el.getAttribute("data-day")); break;
       case "filter-meals": {
         state.ui.mealsFilter = el.getAttribute("data-filter");
@@ -3136,13 +3060,6 @@
       case "manual-steps": openManualSteps(); break;
       case "log-sleep": openLogSleep(); break;
       case "quick-log-meal": openQuickLogMeal(); break;
-      case "open-laddu": openLaddu(); break;
-      case "log-laddu": logLaddu(el.getAttribute("data-id")); break;
-      case "delete-laddu": {
-        state.ladduBatches = state.ladduBatches.filter((b) => b.id !== el.getAttribute("data-id"));
-        saveNow(); renderMeals(); toast("Laddu batch removed");
-        break;
-      }
       case "delete-food": {
         const key = state.ui.mealsDay || todayKey();
         const d = getDay(key);
@@ -3155,6 +3072,7 @@
         save(); renderProgress(); break;
       }
       case "log-weight": openLogWeight(); break;
+      case "load-sample-meals": loadDemoSampleMeals(); break;
       case "export-data": exportData(); break;
       case "reset-data": resetData(); break;
     }
@@ -3189,15 +3107,6 @@
       }
       saveNow();
       return;
-    }
-  });
-
-  document.addEventListener("input", (e) => {
-    const t = e.target;
-    if (t.matches("[data-note]")) {
-      const key = state.ui.mealsDay || todayKey();
-      getDay(key).meals[t.getAttribute("data-note")].note = t.value;
-      save();
     }
   });
 
